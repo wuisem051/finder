@@ -745,12 +745,18 @@
           <button type="button" class="btn-submit-payment" id="confirmPaymentBtn">Confirmar y Registrar Pago</button>
         </div>
 
-        <!-- Pantalla de Éxito -->
+        <!-- Pantalla de Éxito / Estado Pendiente -->
         <div id="modalSuccessScreen" class="modal-success-screen">
-          <div class="success-icon">✓</div>
+          <div class="success-icon" style="background:#fffbeb; color:#d97706; font-size:28px;">⏳</div>
           <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; color: #0f172a;">¡Pago Registrado!</h3>
-          <p style="color: #475569; font-size: 0.95rem; margin-bottom: 20px;">
-            Hemos recibido los datos de tu orden. Tu acceso será verificado y activado por Discord en breve.
+          <div style="margin: 12px 0 16px 0;">
+            <span style="background: #fef3c7; color: #92400e; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; display: inline-block;">
+              🟡 PENDIENTE DE VERIFICACIÓN
+            </span>
+          </div>
+          <p style="color: #475569; font-size: 0.92rem; margin-bottom: 20px; line-height: 1.5;">
+            Tu orden se ha registrado correctamente. El administrador verificará tu pago y activará tu servicio en breve.<br>
+            Puedes revisar el estado de tu activación en <a href="/user.html" style="color:#2563eb; font-weight:700;">Mi Panel</a> con tu Discord y PIN.
           </p>
           <button type="button" class="btn-submit-payment" id="finishPaymentBtn">Entendido</button>
         </div>
