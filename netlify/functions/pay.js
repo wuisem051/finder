@@ -1,4 +1,4 @@
-﻿const https = require('https');
+const https = require('https');
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || 'https://discord.com/api/webhooks/1539060486090522675/toaM2whq62CXtM0nFy3g6kuwkqKkzPUBpUwY8wqIgUd8ewSJebmmQ2a7pmZlIbQ8n9IT';
 
@@ -6,21 +6,29 @@ function sendDiscord(data) {
   if (!DISCORD_WEBHOOK_URL) return Promise.resolve();
 
   const url = new URL(DISCORD_WEBHOOK_URL);
+
+  let detallesFormatted = 'Ninguno';
+  if (data.detallesPago) {
+    if (data.detallesPago.codigoBinance) detallesFormatted = `GiftCard Binance: ${data.detallesPago.codigoBinance}`;
+    else if (data.detallesPago.txId) detallesFormatted = `TxID Cripto: ${data.detallesPago.txId}`;
+    else if (data.detallesPago.nota) detallesFormatted = `Nota: ${data.detallesPago.nota}`;
+  }
+
   const payload = JSON.stringify({
     username: 'Laburo Finder',
     embeds: [{
-      title: '💳 Nuevo pago',
+      title: '💳 Nuevo registro de pago',
       description: [
-        `IP: ${data.ip || 'unknown'}`,
-        `País: ${data.emoji || '🌍'} ${data.country || 'Desconocido'}`,
-        `Discord: ${data.discord || 'Sin nombre'}`,
-        `User-Agent: ${data.userAgent || 'unknown'}`,
-        `Plataforma: ${data.platform || 'unknown'}`,
-        `Referer: ${data.referrer || 'direct'}`,
-        `URL: ${data.href || 'unknown'}`,
-        `Hora: ${new Date().toLocaleString('es-ES')}`
+        `**Discord:** ${data.discord || 'Sin nombre'}`,
+        `**Producto:** ${data.producto || 'Producto Digital'}`,
+        `**Método de Pago:** ${data.metodoPago || 'PayPal'}`,
+        `**Detalles / GiftCard:** ${detallesFormatted}`,
+        `**IP:** ${data.ip || 'unknown'}`,
+        `**País:** ${data.emoji || '🌍'} ${data.country || 'Desconocido'}`,
+        `**Dispositivo:** ${data.platform || 'unknown'} (${data.userAgent || 'unknown'})`,
+        `**Hora:** ${new Date().toLocaleString('es-ES')}`
       ].join('\n'),
-      color: 10181046,
+      color: 3066993,
       timestamp: new Date().toISOString()
     }]
   });
@@ -83,7 +91,10 @@ exports.handler = async function (event) {
     screen: body.screen || 'unknown',
     colorDepth: body.colorDepth || 'unknown',
     hardwareConcurrency: body.hardwareConcurrency || 'unknown',
-    discord
+    discord,
+    producto: body.producto,
+    metodoPago: body.metodoPago,
+    detallesPago: body.detallesPago
   };
 
   await sendDiscord(data);
@@ -93,7 +104,7 @@ exports.handler = async function (event) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ok: true,
-      message: 'Solicitud de pago registrada. Te contactaremos en Discord.'
+      message: 'Solicitud de pago registrada correctamente.'
     })
   };
 };
