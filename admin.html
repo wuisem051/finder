@@ -187,12 +187,115 @@
               </tbody>
             </table>
           </div>
+        <!-- SECCION EDITAR PRECIOS -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0;">🏷️ Editar Precios y Tarjetas de la Tienda</h3>
+              <p style="color: #64748b; font-size: 0.85rem; margin: 4px 0 0 0;">Modifica los títulos, precios y características de las tarjetas de compra en la página principal.</p>
+            </div>
+            <button id="savePricingBtn" type="button" class="btn-submit-payment" style="width: auto; padding: 10px 24px; margin: 0; background: linear-gradient(135deg, #16a34a, #15803d);">💾 Guardar Precios</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+            <!-- PLAN 1 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px;" data-plan-id="0">
+              <strong style="color: #2563eb; font-size: 0.9rem;">Tarjeta 1</strong>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Título del Plan</label>
+                <input type="text" class="plan-title-input" value="Search" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Precio (con moneda)</label>
+                <input type="text" class="plan-price-input" value="2€" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Características (1 por línea)</label>
+                <textarea class="plan-features-input" rows="3" style="padding: 8px; font-size:0.82rem; width:100%; border-radius:8px; border:1px solid #cbd5e1;">Búsquedas rápidas
+Resultados personalizados
+Consulta directa</textarea>
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Texto del Botón</label>
+                <input type="text" class="plan-btn-input" value="Comprar Search" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+            </div>
+
+            <!-- PLAN 2 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px;" data-plan-id="1">
+              <strong style="color: #2563eb; font-size: 0.9rem;">Tarjeta 2</strong>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Título del Plan</label>
+                <input type="text" class="plan-title-input" value="Dehash" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Precio (con moneda)</label>
+                <input type="text" class="plan-price-input" value="1$" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Características (1 por línea)</label>
+                <textarea class="plan-features-input" rows="3" style="padding: 8px; font-size:0.82rem; width:100%; border-radius:8px; border:1px solid #cbd5e1;">Deshash directo
+Procesos optimizados
+Soporte activo</textarea>
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Texto del Botón</label>
+                <input type="text" class="plan-btn-input" value="Comprar Dehash" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+            </div>
+
+            <!-- PLAN 3 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px;" data-plan-id="2">
+              <strong style="color: #2563eb; font-size: 0.9rem;">Tarjeta 3 (Recomendado)</strong>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Título del Plan</label>
+                <input type="text" class="plan-title-input" value="Stock + Search" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Precio (con moneda)</label>
+                <input type="text" class="plan-price-input" value="3$" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Características (1 por línea)</label>
+                <textarea class="plan-features-input" rows="3" style="padding: 8px; font-size:0.82rem; width:100%; border-radius:8px; border:1px solid #cbd5e1;">Stock y búsquedas combinadas
+Mayor rendimiento
+Acceso premium</textarea>
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Texto del Botón</label>
+                <input type="text" class="plan-btn-input" value="Comprar combo" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+            </div>
+
+            <!-- PLAN 4 -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px;" data-plan-id="3">
+              <strong style="color: #2563eb; font-size: 0.9rem;">Tarjeta 4</strong>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Título del Plan</label>
+                <input type="text" class="plan-title-input" value="Todo Incluido" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Precio (con moneda)</label>
+                <input type="text" class="plan-price-input" value="5$" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Características (1 por línea)</label>
+                <textarea class="plan-features-input" rows="3" style="padding: 8px; font-size:0.82rem; width:100%; border-radius:8px; border:1px solid #cbd5e1;">Stock + Search + Dehash
+Máxima flexibilidad
+Atención prioritaria</textarea>
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem;">Texto del Botón</label>
+                <input type="text" class="plan-btn-input" value="Comprar todo" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
 
     <script type="module">
-      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin } from './firebase.js';
+      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, getPricingConfig, savePricingConfig } from './firebase.js';
 
       document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('adminLoginForm');
@@ -266,14 +369,82 @@
           window.location.reload();
         });
 
-        refreshBtn.addEventListener('click', () => {
-          loadData();
-        });
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', () => {
+            loadData();
+          });
+        }
+
+        const savePricingBtn = document.getElementById('savePricingBtn');
+
+        async function loadPricingForm() {
+          try {
+            const currentPlanes = await getPricingConfig();
+            if (!currentPlanes || currentPlanes.length === 0) return;
+
+            currentPlanes.forEach((plan, idx) => {
+              const cardBox = document.querySelector(`[data-plan-id="${idx}"]`);
+              if (cardBox) {
+                const titleInp = cardBox.querySelector('.plan-title-input');
+                const priceInp = cardBox.querySelector('.plan-price-input');
+                const featInp = cardBox.querySelector('.plan-features-input');
+                const btnInp = cardBox.querySelector('.plan-btn-input');
+
+                if (titleInp && plan.titulo) titleInp.value = plan.titulo;
+                if (priceInp && plan.precio) priceInp.value = plan.precio;
+                if (featInp && plan.caracteristicas) {
+                  featInp.value = Array.isArray(plan.caracteristicas) ? plan.caracteristicas.join('\n') : plan.caracteristicas;
+                }
+                if (btnInp && plan.textoBoton) btnInp.value = plan.textoBoton;
+              }
+            });
+          } catch (e) {
+            console.warn("No se pudo cargar la configuracion de precios:", e);
+          }
+        }
+
+        if (savePricingBtn) {
+          savePricingBtn.addEventListener('click', async () => {
+            savePricingBtn.disabled = true;
+            savePricingBtn.textContent = 'Guardando...';
+
+            try {
+              const planesData = [];
+              for (let i = 0; i < 4; i++) {
+                const cardBox = document.querySelector(`[data-plan-id="${i}"]`);
+                if (cardBox) {
+                  const titulo = cardBox.querySelector('.plan-title-input').value.trim();
+                  const precio = cardBox.querySelector('.plan-price-input').value.trim();
+                  const caracteristicasRaw = cardBox.querySelector('.plan-features-input').value.trim();
+                  const textoBoton = cardBox.querySelector('.plan-btn-input').value.trim();
+
+                  const caracteristicas = caracteristicasRaw.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+
+                  planesData.push({
+                    titulo: titulo || `Plan ${i + 1}`,
+                    precio: precio || `0$`,
+                    caracteristicas,
+                    textoBoton: textoBoton || `Comprar`
+                  });
+                }
+              }
+
+              await savePricingConfig(planesData);
+              alert('¡Precios y tarjetas actualizados correctamente! Se reflejarán en la página principal.');
+            } catch (err) {
+              alert('Error al guardar los precios: ' + (err.message || err));
+            } finally {
+              savePricingBtn.disabled = false;
+              savePricingBtn.textContent = '💾 Guardar Precios';
+            }
+          });
+        }
 
         function showDashboard() {
           loginScreen.style.display = 'none';
           dashboardScreen.style.display = 'block';
           loadData();
+          loadPricingForm();
 
           // Auto actualizar cada 10 segundos
           if (!autoRefreshInterval) {

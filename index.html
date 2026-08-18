@@ -203,57 +203,65 @@
 
       <section id="pricing" class="pricing section-block">
         <div class="container pricing-wrap">
-          <div class="pricing-copy">
-            <span class="eyebrow">Oferta</span>
-            <h2>Servicios premium</h2>
-            <p>
-              Elige el servicio que necesites: Search, Dehash o Stock. Todo con acceso rápido,
-              panel claro y soporte directo.
+          <div style="text-align: center; max-width: 600px; margin: 0 auto 30px auto;">
+            <span class="eyebrow">Oferta Especial</span>
+            <h2 style="margin: 10px 0 8px 0; font-size: 2.2rem; font-weight: 800; color: #0f172a;">Servicios Premium</h2>
+            <p style="color: #64748b; font-size: 0.95rem; margin: 0;">
+              Elige el servicio que necesites con acceso rápido, panel claro y soporte directo.
             </p>
           </div>
 
-          <div class="pricing-grid">
-            <div class="price-card">
-              <div class="price-tag">2€</div>
-              <div class="price-title">Search</div>
-              <ul>
-                <li>Búsquedas rápidas</li>
-                <li>Resultados personalizados</li>
-                <li>Consulta directa</li>
-              </ul>
+          <div class="pricing-grid-4" id="pricingGrid">
+            <div class="price-card-compact" data-plan-index="0">
+              <div>
+                <div class="price-tag">2€</div>
+                <div class="price-title">Search</div>
+                <ul>
+                  <li>Búsquedas rápidas</li>
+                  <li>Resultados personalizados</li>
+                  <li>Consulta directa</li>
+                </ul>
+              </div>
               <a href="#" class="button button-primary full-width payment-trigger">Comprar Search</a>
             </div>
 
-            <div class="price-card">
-              <div class="price-tag">1$</div>
-              <div class="price-title">Dehash</div>
-              <ul>
-                <li>Deshash directo</li>
-                <li>Procesos optimizados</li>
-                <li>Soporte activo</li>
-              </ul>
+            <div class="price-card-compact" data-plan-index="1">
+              <div>
+                <div class="price-tag">1$</div>
+                <div class="price-title">Dehash</div>
+                <ul>
+                  <li>Deshash directo</li>
+                  <li>Procesos optimizados</li>
+                  <li>Soporte activo</li>
+                </ul>
+              </div>
               <a href="#" class="button button-primary full-width payment-trigger">Comprar Dehash</a>
             </div>
 
-            <div class="price-card featured">
-              <div class="price-tag">3$</div>
-              <div class="price-title">Stock + Search</div>
-              <ul>
-                <li>Stock y búsquedas combinadas</li>
-                <li>Mayor rendimiento</li>
-                <li>Acceso premium</li>
-              </ul>
+            <div class="price-card-compact featured" data-plan-index="2">
+              <div>
+                <div style="position: absolute; top: -12px; right: 14px; background: #2563eb; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">RECOMENDADO</div>
+                <div class="price-tag">3$</div>
+                <div class="price-title">Stock + Search</div>
+                <ul>
+                  <li>Stock y búsquedas combinadas</li>
+                  <li>Mayor rendimiento</li>
+                  <li>Acceso premium</li>
+                </ul>
+              </div>
               <a href="#" class="button button-primary full-width payment-trigger">Comprar combo</a>
             </div>
 
-            <div class="price-card">
-              <div class="price-tag">5$</div>
-              <div class="price-title">Stock + Search + Dehash</div>
-              <ul>
-                <li>Todo incluido</li>
-                <li>Máxima flexibilidad</li>
-                <li>Atención prioritaria</li>
-              </ul>
+            <div class="price-card-compact" data-plan-index="3">
+              <div>
+                <div class="price-tag">5$</div>
+                <div class="price-title">Todo Incluido</div>
+                <ul>
+                  <li>Stock + Search + Dehash</li>
+                  <li>Máxima flexibilidad</li>
+                  <li>Atención prioritaria</li>
+                </ul>
+              </div>
               <a href="#" class="button button-primary full-width payment-trigger">Comprar todo</a>
             </div>
           </div>
@@ -291,7 +299,48 @@
     </footer>
 
     <script type="module">
-      import { saveVisit, savePurchase } from './firebase.js';
+      import { saveVisit, savePurchase, getPricingConfig } from './firebase.js';
+
+      async function applyDynamicPricing() {
+        const dynamicPlanes = await getPricingConfig();
+        if (!dynamicPlanes || dynamicPlanes.length === 0) return;
+
+        const cards = document.querySelectorAll('.price-card-compact');
+        const planSelect = document.getElementById('planSelect');
+
+        if (planSelect) planSelect.innerHTML = '';
+
+        dynamicPlanes.forEach((plan, index) => {
+          const card = cards[index];
+          if (card) {
+            const priceTag = card.querySelector('.price-tag');
+            const priceTitle = card.querySelector('.price-title');
+            const ul = card.querySelector('ul');
+            const btn = card.querySelector('.button');
+
+            if (priceTag) priceTag.textContent = plan.precio;
+            if (priceTitle) priceTitle.textContent = plan.titulo;
+            if (btn) btn.textContent = plan.textoBoton || `Comprar ${plan.titulo}`;
+
+            if (ul && plan.caracteristicas) {
+              const features = Array.isArray(plan.caracteristicas) 
+                ? plan.caracteristicas 
+                : String(plan.caracteristicas).split('\n').filter(f => f.trim().length > 0);
+
+              ul.innerHTML = features.map(f => `<li>${f.trim()}</li>`).join('');
+            }
+          }
+
+          if (planSelect) {
+            const opt = document.createElement('option');
+            opt.value = `${plan.titulo} - ${plan.precio}`;
+            opt.textContent = `${plan.titulo} (${plan.precio})`;
+            planSelect.appendChild(opt);
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', applyDynamicPricing);
 
       // Protección Anti-Inspección (Bloqueo F12, Click Derecho, Combinaciones)
       document.addEventListener('contextmenu', (e) => e.preventDefault());

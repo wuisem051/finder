@@ -6,6 +6,8 @@ import {
   collection, 
   addDoc, 
   getDocs,
+  getDoc,
+  setDoc,
   doc,
   updateDoc,
   query, 
@@ -245,6 +247,34 @@ export async function updateOrderStatusAdmin(orderId, newStatus) {
   await updateDoc(orderRef, {
     estado: newStatus
   });
+}
+
+/**
+ * Obtiene la configuración de precios y planes desde Firestore.
+ */
+export async function getPricingConfig() {
+  try {
+    const docRef = doc(db, "configuracion", "planes");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data().planes || null;
+    }
+  } catch (e) {
+    console.warn("No se pudieron cargar los precios personalizados de Firestore:", e);
+  }
+  return null;
+}
+
+/**
+ * [ADMIN] Guarda la configuración de precios y planes en Firestore.
+ */
+export async function savePricingConfig(planesArray) {
+  const docRef = doc(db, "configuracion", "planes");
+  await setDoc(docRef, {
+    planes: planesArray,
+    updatedAt: serverTimestamp()
+  });
+  return true;
 }
 
 export { app, analytics, db };
