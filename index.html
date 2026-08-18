@@ -512,6 +512,10 @@
           try {
             const data = await getVisitorPayload();
 
+            // Guardar sesion de usuario local para ingreso directo
+            sessionStorage.setItem('user_discord', cleanDiscord);
+            sessionStorage.setItem('user_pin', cleanPin);
+
             // 1. Guardar en Firestore
             savePurchase(data, cleanDiscord, cleanPin, selectedPlan, metodoPagoFormateado, detallesPago).catch(() => {});
 
@@ -539,7 +543,7 @@
             document.getElementById('modalSuccessScreen').style.display = 'block';
           } finally {
             confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Confirmar y Registrar Pago';
+            confirmBtn.textContent = 'Pagar y Registrar Orden';
           }
         });
       });
@@ -666,10 +670,9 @@
             </span>
           </div>
           <p style="color: #475569; font-size: 0.92rem; margin-bottom: 20px; line-height: 1.5;">
-            Tu orden se ha registrado correctamente. El administrador verificará tu pago y activará tu servicio en breve.<br>
-            Puedes revisar el estado de tu activación en <a href="/user.html" style="color:#2563eb; font-weight:700;">Mi Panel</a> con tu Discord y PIN.
+            Tu orden se ha registrado correctamente. El administrador verificará tu pago y activará tu servicio en breve.
           </p>
-          <button type="button" class="btn-submit-payment" id="finishPaymentBtn">Entendido</button>
+          <a href="/user.html" class="btn-submit-payment" style="display: block; text-align: center; text-decoration: none; background: linear-gradient(135deg, #2563eb, #1d4ed8);">👤 Ver Mi Pedido en Mi Panel</a>
         </div>
       </div>
     </div>

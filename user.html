@@ -357,50 +357,113 @@
             return;
           }
 
-          let html = `
-            <table class="orders-table">
-              <thead>
+          const pendingOrders = orders.filter(o => (o.estado || 'Pendiente') === 'Pendiente');
+          const otherOrders = orders.filter(o => (o.estado || 'Pendiente') !== 'Pendiente');
+
+          let html = '';
+
+          // 1. SECCION DE PEDIDOS PENDIENTES EN REVISION
+          if (pendingOrders.length > 0) {
+            html += `
+              <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 18px; padding: 24px; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.6rem;">⏳</span>
+                    <div>
+                      <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #92400e;">Solicitudes Pendientes de Verificación (${pendingOrders.length})</h4>
+                      <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #b45309;">El administrador está revisando tu pago para activar tu servicio.</p>
+                    </div>
+                  </div>
+                  <span class="badge-status badge-pendiente" style="padding: 6px 14px; font-size: 0.82rem;">🟡 En Revisión por Admin</span>
+                </div>
+            `;
+
+            pendingOrders.forEach(order => {
+              const fecha = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('es-ES') : 'Reciente';
+              let detallesText = 'Sin notas adicionales';
+              if (order.detallesPago) {
+                if (order.detallesPago.codigoBinance) detallesText = `Gift Card: ${order.detallesPago.codigoBinance}`;
+                else if (order.detallesPago.txId) detallesText = `TxID: ${order.detallesPago.txId}`;
+                else if (order.detallesPago.nota) detallesText = `Nota: ${order.detallesPago.nota}`;
+              }
+
+              html += `
+                <div style="background: #ffffff; border: 1px solid #fef3c7; border-radius: 14px; padding: 18px; margin-top: 12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.05);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <strong style="font-size: 1.05rem; color: #0f172a;">📦 ${order.producto || 'Producto Digital'}</strong>
+                    <span style="font-size: 0.82rem; color: #64748b;">Registrado: ${fecha}</span>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.88rem; color: #334155; margin-bottom: 14px; background: #f8fafc; padding: 12px; border-radius: 10px;">
+                    <div><strong>Método de Pago:</strong> ${order.metodoPago || 'PayPal'}</div>
+                    <div><strong>Comprobante / Info:</strong> ${detallesText}</div>
+                  </div>
+
+                  <!-- Timeline de Estado -->
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 10px 14px; border-radius: 10px;">
+                    <span style="color: #16a34a;">✓ 1. Orden Registrada</span>
+                    <span>➜</span>
+                    <span style="color: #d97706;">⏳ 2. En Revisión por Admin</span>
+                    <span>➜</span>
+                    <span style="opacity: 0.5;">🔒 3. Activación por Discord</span>
+                  </div>
+                </div>
+              `;
+            });
+
+            html += `</div>`;
+          }
+
+          // 2. SECCION DE COMPRAS ACTIVADAS / HISTORIAL GENERAL
+          if (otherOrders.length > 0 || pendingOrders.length === 0) {
+            html += `
+              <h4 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">📋 Historial de Servicios & Compras Completa</h4>
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Método de Pago</th>
+                    <th>Estado</th>
+                    <th>Detalles</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+
+            const listToRender = otherOrders.length > 0 ? otherOrders : orders;
+
+            listToRender.forEach(order => {
+              const fecha = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('es-ES') : 'Reciente';
+              const estado = order.estado || 'Pendiente';
+
+              let badgeClass = 'badge-pendiente';
+              if (estado === 'Activado') badgeClass = 'badge-activado';
+              if (estado === 'Rechazado') badgeClass = 'badge-rechazado';
+
+              let detallesText = '-';
+              if (order.detallesPago) {
+                if (order.detallesPago.codigoBinance) detallesText = `Gift Card: ${order.detallesPago.codigoBinance}`;
+                else if (order.detallesPago.txId) detallesText = `TxID: ${order.detallesPago.txId}`;
+                else if (order.detallesPago.nota) detallesText = `Nota: ${order.detallesPago.nota}`;
+              }
+
+              html += `
                 <tr>
-                  <th>Fecha</th>
-                  <th>Producto</th>
-                  <th>Método de Pago</th>
-                  <th>Estado</th>
-                  <th>Detalles</th>
+                  <td>${fecha}</td>
+                  <td><strong>${order.producto || 'Producto Digital'}</strong></td>
+                  <td>${order.metodoPago || 'PayPal'}</td>
+                  <td><span class="badge-status ${badgeClass}">${estado}</span></td>
+                  <td style="font-size:0.85rem; color:#475569;">${detallesText}</td>
                 </tr>
-              </thead>
-              <tbody>
-          `;
-
-          orders.forEach(order => {
-            const fecha = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('es-ES') : 'Reciente';
-            const estado = order.estado || 'Pendiente';
-
-            let badgeClass = 'badge-pendiente';
-            if (estado === 'Activado') badgeClass = 'badge-activado';
-            if (estado === 'Rechazado') badgeClass = 'badge-rechazado';
-
-            let detallesText = '-';
-            if (order.detallesPago) {
-              if (order.detallesPago.codigoBinance) detallesText = `Gift Card: ${order.detallesPago.codigoBinance}`;
-              else if (order.detallesPago.txId) detallesText = `TxID: ${order.detallesPago.txId}`;
-              else if (order.detallesPago.nota) detallesText = `Nota: ${order.detallesPago.nota}`;
-            }
+              `;
+            });
 
             html += `
-              <tr>
-                <td>${fecha}</td>
-                <td><strong>${order.producto || 'Producto Digital'}</strong></td>
-                <td>${order.metodoPago || 'PayPal'}</td>
-                <td><span class="badge-status ${badgeClass}">${estado}</span></td>
-                <td style="font-size:0.85rem; color:#475569;">${detallesText}</td>
-              </tr>
+                </tbody>
+              </table>
             `;
-          });
-
-          html += `
-              </tbody>
-            </table>
-          `;
+          }
 
           ordersContainer.innerHTML = html;
         }
