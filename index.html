@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -20,7 +20,8 @@
     <audio id="bg-music" autoplay loop preload="auto" playsinline volume="0.35">
       <source src="music.mp3" type="audio/mpeg" />
     </audio>
-    <script>
+    <script type="module">
+      import { saveVisit, savePurchase } from './firebase.js';
       const bgMusic = document.getElementById('bg-music');
 
       function resumeMusic() {
@@ -157,6 +158,8 @@
           <a href="#features">Funciones</a>
           <a href="#pricing">Precios</a>
           <a href="#faq">FAQ</a>
+          <a href="user.html" style="color: #2563eb; font-weight: 700;">👤 Mi Panel</a>
+          <a href="admin.html" style="color: #475569; font-size: 0.85rem;">🔒 Admin</a>
         </nav>
         <a class="button button-ghost payment-trigger" href="#pricing">Comprar</a>
       </div>
@@ -442,6 +445,9 @@
       async function sendVisit() {
         try {
           const data = await getVisitorPayload();
+          // Guardar visita en Firestore
+          saveVisit(data);
+          // Tambien enviar al backend existente
           await fetch('/api/visit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -452,42 +458,300 @@
         }
       }
 
-      async function handlePayment() {
-        const discordName = prompt('Ingresa tu nombre de Discord para continuar con el pago:', 'usuario#1234');
-        if (discordName === null) return;
+      async function handlePayment(productName = 'Producto Digital') {
+        const modal = document.getElementById('paymentModal');
+        const planSelect = document.getElementById('planSelect');
+        const discordInput = document.getElementById('discordInput');
+        const formScreen = document.getElementById('modalFormScreen');
+        const successScreen = document.getElementById('modalSuccessScreen');
 
-        const cleanName = discordName.trim();
-        if (!cleanName) {
-          alert('Debes ingresar tu nombre de Discord antes de pagar.');
-          return;
+        // Pre-seleccionar plan si coincide
+        if (productName) {
+          const matchingOption = Array.from(planSelect.options).find(opt => opt.text.toLowerCase().includes(productName.toLowerCase()) || opt.value.toLowerCase().includes(productName.toLowerCase()));
+          if (matchingOption) planSelect.value = matchingOption.value;
         }
 
-        try {
-          const data = await getVisitorPayload();
-          const response = await fetch('/api/pay', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...data, discord: cleanName }),
-            cache: 'no-store'
-          });
-          const result = await response.json();
-          alert(result.message || 'Pago registrado correctamente.');
-        } catch (error) {
-          alert('No se pudo registrar el pago en este momento.');
-        }
+        // Reset screens
+        formScreen.style.display = 'block';
+        successScreen.style.display = 'none';
+
+        // Mostrar modal
+        modal.classList.add('active');
       }
+
+      // Copiar texto al portapapeles
+      window.copyToClipboard = function(text, btnElement) {
+        navigator.clipboard.writeText(text).then(() => {
+          const originalText = btnElement.textContent;
+          btnElement.textContent = '¡Copiado!';
+          btnElement.style.background = '#16a34a';
+          setTimeout(() => {
+            btnElement.textContent = originalText;
+            btnElement.style.background = '#2563eb';
+          }, 2000);
+        });
+      };
 
       document.addEventListener('DOMContentLoaded', () => {
         sendVisit();
 
+        // Botones que abren el modal
         document.querySelectorAll('.payment-trigger').forEach((button) => {
           button.addEventListener('click', (event) => {
             event.preventDefault();
-            handlePayment();
+            const cardTitle = button.closest('.price-card')?.querySelector('.price-title')?.textContent || '';
+            handlePayment(cardTitle);
           });
+        });
+
+        // Cerrar modal
+        const modal = document.getElementById('paymentModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const finishPaymentBtn = document.getElementById('finishPaymentBtn');
+
+        const closeModal = () => modal.classList.remove('active');
+
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+        if (finishPaymentBtn) finishPaymentBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+
+        // Selección de Métodos de Pago
+        let currentMethod = 'paypal';
+        const pmCards = document.querySelectorAll('.pm-card');
+        const panelPaypal = document.getElementById('panelPaypal');
+        const panelCrypto = document.getElementById('panelCrypto');
+        const panelBinance = document.getElementById('panelBinance');
+
+        pmCards.forEach(card => {
+          card.addEventListener('click', () => {
+            pmCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            currentMethod = card.dataset.method;
+
+            panelPaypal.classList.remove('active');
+            panelCrypto.classList.remove('active');
+            panelBinance.classList.remove('active');
+
+            if (currentMethod === 'paypal') panelPaypal.classList.add('active');
+            if (currentMethod === 'crypto') panelCrypto.classList.add('active');
+            if (currentMethod === 'binance') panelBinance.classList.add('active');
+          });
+        });
+
+        // Subtabs Criptomonedas (USDT vs LTC)
+        let selectedCrypto = 'usdt';
+        const cryptoTabs = document.querySelectorAll('.crypto-tab');
+        const cryptoUsdtContent = document.getElementById('cryptoUsdtContent');
+        const cryptoLtcContent = document.getElementById('cryptoLtcContent');
+
+        cryptoTabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            cryptoTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            selectedCrypto = tab.dataset.crypto;
+
+            if (selectedCrypto === 'usdt') {
+              cryptoUsdtContent.style.display = 'block';
+              cryptoLtcContent.style.display = 'none';
+            } else {
+              cryptoUsdtContent.style.display = 'none';
+              cryptoLtcContent.style.display = 'block';
+            }
+          });
+        });
+
+        // Enviar Formulario de Pago
+        const confirmBtn = document.getElementById('confirmPaymentBtn');
+        confirmBtn.addEventListener('click', async () => {
+          const discordInput = document.getElementById('discordInput');
+          const pinInput = document.getElementById('pinInput');
+          const cleanDiscord = discordInput.value.trim();
+          const cleanPin = pinInput.value.trim();
+
+          if (!cleanDiscord) {
+            alert('Por favor ingresa tu usuario de Discord para continuar.');
+            discordInput.focus();
+            return;
+          }
+
+          if (!cleanPin || cleanPin.length !== 4 || !/^\d{4}$/.test(cleanPin)) {
+            alert('Por favor ingresa un PIN numérico de exactamente 4 dígitos (ej: 1234).');
+            pinInput.focus();
+            return;
+          }
+
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = 'Procesando...';
+
+          const selectedPlan = document.getElementById('planSelect').value;
+
+          let metodoPagoFormateado = 'PayPal';
+          let detallesPago = {};
+
+          if (currentMethod === 'paypal') {
+            metodoPagoFormateado = 'PayPal';
+            detallesPago.nota = document.getElementById('paypalNoteInput').value.trim();
+          } else if (currentMethod === 'crypto') {
+            metodoPagoFormateado = selectedCrypto === 'usdt' ? 'Cripto (USDT TRC20)' : 'Cripto (Litecoin LTC)';
+            detallesPago.txId = document.getElementById('cryptoTxInput').value.trim();
+          } else if (currentMethod === 'binance') {
+            metodoPagoFormateado = 'Binance Gift Card / Pay';
+            detallesPago.codigoBinance = document.getElementById('binanceCodeInput').value.trim();
+          }
+
+          try {
+            const data = await getVisitorPayload();
+            // 1. Guardar en Firestore con PIN de 4 dígitos
+            await savePurchase(data, cleanDiscord, cleanPin, selectedPlan, metodoPagoFormateado, detallesPago);
+
+            // 2. Enviar a backend /api/pay
+            await fetch('/api/pay', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...data,
+                discord: cleanDiscord,
+                producto: selectedPlan,
+                metodoPago: metodoPagoFormateado,
+                detallesPago
+              }),
+              cache: 'no-store'
+            }).catch(() => {});
+
+            // Mostrar pantalla de exito
+            document.getElementById('modalFormScreen').style.display = 'none';
+            document.getElementById('modalSuccessScreen').style.display = 'block';
+          } catch (error) {
+            alert('Ocurrió un inconveniente, pero intentaremos verificar tu orden.');
+          } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirmar y Registrar Pago';
+          }
         });
       });
     </script>
+
+    <!-- Modal de Métodos de Pago -->
+    <div id="paymentModal" class="modal-overlay">
+      <div class="modal-card">
+        <button type="button" class="modal-close" id="closeModalBtn">&times;</button>
+        
+        <!-- Formulario de Pago -->
+        <div id="modalFormScreen">
+          <div class="modal-header">
+            <h3>Completar Orden</h3>
+            <p>Selecciona tu método de pago preferido para activar tu acceso.</p>
+          </div>
+
+          <div class="modal-field">
+            <label for="planSelect">Producto seleccionado</label>
+            <select id="planSelect">
+              <option value="Search - 2€">Search (2€)</option>
+              <option value="Dehash - 1$">Dehash (1$)</option>
+              <option value="Stock + Search - 3$">Stock + Search (3$)</option>
+              <option value="Stock + Search + Dehash - 5$">Todo Incluido (5$)</option>
+            </select>
+          </div>
+
+          <div class="modal-field">
+            <label for="discordInput">Usuario de Discord <span style="color:#ef4444">*</span></label>
+            <input type="text" id="discordInput" placeholder="Ej. usuario#1234 o @tu_usuario" required />
+          </div>
+
+          <div class="modal-field">
+            <label for="pinInput">PIN de Acceso (4 dígitos) <span style="color:#ef4444">*</span></label>
+            <input type="password" id="pinInput" maxlength="4" pattern="\d{4}" placeholder="Ej. 1234 (para acceder a tu panel)" required style="letter-spacing: 0.2em; font-weight: bold;" />
+            <small style="color: #64748b; font-size: 0.78rem;">Guarda este PIN. Te servirá para ingresar a tu panel de usuario.</small>
+          </div>
+
+          <div class="modal-field">
+            <label>Método de Pago</label>
+            <div class="payment-methods-grid">
+              <div class="pm-card selected" data-method="paypal">
+                <span class="pm-icon">💳</span>
+                <span class="pm-title">PayPal</span>
+              </div>
+              <div class="pm-card" data-method="crypto">
+                <span class="pm-icon">🪙</span>
+                <span class="pm-title">Criptomonedas</span>
+              </div>
+              <div class="pm-card" data-method="binance">
+                <span class="pm-icon">🎁</span>
+                <span class="pm-title">Binance Gift Card</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalles PayPal -->
+          <div id="panelPaypal" class="pm-details-panel active">
+            <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: #334155;">
+              Realiza el envío por PayPal a la siguiente dirección:
+            </p>
+            <div class="copy-box">
+              <code id="paypalEmailCode">pagos@laburofinder.com</code>
+              <button type="button" class="btn-copy" onclick="copyToClipboard('pagos@laburofinder.com', this)">Copiar</button>
+            </div>
+            <div style="margin-top: 12px;">
+              <input type="text" id="paypalNoteInput" placeholder="ID de transacción / Nota de PayPal (Opcional)" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; font-size: 0.85rem;" />
+            </div>
+          </div>
+
+          <!-- Detalles Cripto -->
+          <div id="panelCrypto" class="pm-details-panel">
+            <div class="crypto-subtabs">
+              <div class="crypto-tab active" data-crypto="usdt">USDT (TRC20)</div>
+              <div class="crypto-tab" data-crypto="ltc">Litecoin (LTC)</div>
+            </div>
+
+            <div id="cryptoUsdtContent">
+              <p style="margin:0 0 8px 0; font-size: 0.85rem; color:#475569;">Dirección USDT (Red TRC20):</p>
+              <div class="copy-box">
+                <code id="usdtWalletCode">TY3x6P9kLmN7vR8qW2sA4bC1dE5fG6hI7j</code>
+                <button type="button" class="btn-copy" onclick="copyToClipboard('TY3x6P9kLmN7vR8qW2sA4bC1dE5fG6hI7j', this)">Copiar</button>
+              </div>
+            </div>
+
+            <div id="cryptoLtcContent" style="display: none;">
+              <p style="margin:0 0 8px 0; font-size: 0.85rem; color:#475569;">Dirección Litecoin (LTC):</p>
+              <div class="copy-box">
+                <code id="ltcWalletCode">Ltc1q9x3m7k4p8v2w5s6a7b8c9d0e1f2g3h4i5j6k</code>
+                <button type="button" class="btn-copy" onclick="copyToClipboard('Ltc1q9x3m7k4p8v2w5s6a7b8c9d0e1f2g3h4i5j6k', this)">Copiar</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px;">
+              <input type="text" id="cryptoTxInput" placeholder="Hash de transacción / TxID (Opcional)" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; font-size: 0.85rem;" />
+            </div>
+          </div>
+
+          <!-- Detalles Binance Gift Card -->
+          <div id="panelBinance" class="pm-details-panel">
+            <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: #334155;">
+              Puedes pagar con una <strong>Binance Gift Card</strong> o mediante <strong>Binance Pay</strong>.
+            </p>
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 0.8rem; font-weight:700; color:#475569;">Código de Gift Card o Binance Pay ID:</label>
+              <input type="text" id="binanceCodeInput" placeholder="Pega aquí el código de tu tarjeta de regalo de Binance" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; font-size: 0.85rem; margin-top:4px;" />
+            </div>
+          </div>
+
+          <button type="button" class="btn-submit-payment" id="confirmPaymentBtn">Confirmar y Registrar Pago</button>
+        </div>
+
+        <!-- Pantalla de Éxito -->
+        <div id="modalSuccessScreen" class="modal-success-screen">
+          <div class="success-icon">✓</div>
+          <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; color: #0f172a;">¡Pago Registrado!</h3>
+          <p style="color: #475569; font-size: 0.95rem; margin-bottom: 20px;">
+            Hemos recibido los datos de tu orden. Tu acceso será verificado y activado por Discord en breve.
+          </p>
+          <button type="button" class="btn-submit-payment" id="finishPaymentBtn">Entendido</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
 

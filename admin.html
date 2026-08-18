@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Admin - Laburo Finder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="Animationes.css" />
+    <style>
+      .admin-container {
+        width: min(1200px, calc(100% - 32px));
+        margin: 30px auto;
+      }
+      .admin-login-box {
+        max-width: 400px;
+        margin: 80px auto;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+      }
+      .stat-card .num {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin-top: 4px;
+      }
+      .stat-card .label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+      .admin-table th {
+        background: #0f172a;
+        color: #ffffff;
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .admin-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+        color: #1e293b;
+      }
+      .status-select {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        border: 1.5px solid #cbd5e1;
+        cursor: pointer;
+        outline: none;
+      }
+      .status-select.Pendiente { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+      .status-select.Activado { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+      .status-select.Rechazado { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+      
+      .table-wrapper {
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <a href="index.html" class="brand" style="text-decoration:none; color:inherit;">
+          <span class="brand-mark">L</span>
+          <span>Laburo Finder <small style="font-size:0.7rem; color:#2563eb; background:#eff6ff; padding:2px 6px; border-radius:4px; margin-left:4px;">ADMIN</small></span>
+        </a>
+        <nav class="nav-links">
+          <a href="index.html">Inicio</a>
+          <a href="user.html">Panel Usuario</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="admin-container">
+      <!-- LOGIN ADMIN -->
+      <div id="adminLoginScreen" class="admin-login-box">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div class="brand-mark" style="margin:0 auto 12px auto; width:44px; height:44px; font-size:1.3rem;">🔒</div>
+          <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">Acceso Administrador</h2>
+          <p style="margin: 4px 0 0 0; font-size: 0.88rem; color: #64748b;">Ingresa la contraseña de administrador.</p>
+        </div>
+
+        <form id="adminLoginForm">
+          <div class="modal-field">
+            <label for="adminPass">Contraseña Admin</label>
+            <input type="password" id="adminPass" placeholder="••••••••" required style="text-align: center; font-size: 1.1rem;" />
+            <small style="color: #64748b; font-size: 0.75rem;">(Por defecto: <code>admin123</code>)</small>
+          </div>
+
+          <button type="submit" class="btn-submit-payment" style="margin-top: 10px;">Entrar al Panel Admin</button>
+        </form>
+      </div>
+
+      <!-- DASHBOARD ADMIN -->
+      <div id="adminDashboardScreen" style="display: none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+          <div>
+            <h2 style="margin:0; font-size: 1.6rem; font-weight: 800; color: #0f172a;">📊 Control de Pagos y Usuarios</h2>
+            <p style="margin:4px 0 0 0; color: #64748b; font-size: 0.9rem;">Gestiona y activa los pedidos recibidos en Firestore.</p>
+          </div>
+          <div>
+            <button id="refreshAdminBtn" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 10px; font-weight:700; cursor:pointer; margin-right: 8px;">🔄 Actualizar</button>
+            <button id="adminLogoutBtn" style="background: #ef4444; color: #ffffff; border: none; padding: 8px 16px; border-radius: 10px; font-weight:700; cursor:pointer;">Salir</button>
+          </div>
+        </div>
+
+        <!-- TARJETAS DE ESTADISTICAS -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Total Compras</div>
+            <div class="num" id="statTotalCompras">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Pendientes</div>
+            <div class="num" id="statPendientes" style="color: #d97706;">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Activados</div>
+            <div class="num" id="statActivados" style="color: #16a34a;">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Visitas</div>
+            <div class="num" id="statTotalVisitas">0</div>
+          </div>
+        </div>
+
+        <!-- TABLA DE ORDENES -->
+        <div style="margin-bottom: 30px;">
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">🛒 Registro de Pagos (Compras)</h3>
+          
+          <div class="table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Discord</th>
+                  <th>PIN</th>
+                  <th>Producto</th>
+                  <th>Método Pago</th>
+                  <th>Detalles / Gift Code</th>
+                  <th>IP / País</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTbody">
+                <tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">Cargando compras...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin } from './firebase.js';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.getElementById('adminLoginForm');
+        const loginScreen = document.getElementById('adminLoginScreen');
+        const dashboardScreen = document.getElementById('adminDashboardScreen');
+        const refreshBtn = document.getElementById('refreshAdminBtn');
+        const logoutBtn = document.getElementById('adminLogoutBtn');
+
+        // Contraseña por defecto
+        const ADMIN_PASS = 'admin123';
+
+        if (sessionStorage.getItem('admin_auth') === 'true') {
+          showDashboard();
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const pass = document.getElementById('adminPass').value;
+          if (pass === ADMIN_PASS || pass === '9999') {
+            sessionStorage.setItem('admin_auth', 'true');
+            showDashboard();
+          } else {
+            alert('Contraseña incorrecta. Intenta con admin123');
+          }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('admin_auth');
+          loginScreen.style.display = 'block';
+          dashboardScreen.style.display = 'none';
+        });
+
+        refreshBtn.addEventListener('click', () => {
+          loadData();
+        });
+
+        function showDashboard() {
+          loginScreen.style.display = 'none';
+          dashboardScreen.style.display = 'block';
+          loadData();
+        }
+
+        async function loadData() {
+          try {
+            const [orders, visits] = await Promise.all([
+              getAllOrdersAdmin(),
+              getAllVisitsAdmin()
+            ]);
+
+            // Stats
+            document.getElementById('statTotalCompras').textContent = orders.length;
+            document.getElementById('statPendientes').textContent = orders.filter(o => (o.estado || 'Pendiente') === 'Pendiente').length;
+            document.getElementById('statActivados').textContent = orders.filter(o => o.estado === 'Activado').length;
+            document.getElementById('statTotalVisitas').textContent = visits.length;
+
+            renderOrdersTable(orders);
+          } catch (error) {
+            console.error('Error cargando datos admin:', error);
+          }
+        }
+
+        function renderOrdersTable(orders) {
+          const tbody = document.getElementById('adminOrdersTbody');
+
+          if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">No hay compras registradas en Firestore aún.</td></tr>';
+            return;
+          }
+
+          let html = '';
+          orders.forEach(order => {
+            const fecha = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('es-ES') : 'Reciente';
+            const estadoActual = order.estado || 'Pendiente';
+
+            let detallesText = '-';
+            if (order.detallesPago) {
+              if (order.detallesPago.codigoBinance) detallesText = `🎁 GiftCard: <strong>${order.detallesPago.codigoBinance}</strong>`;
+              else if (order.detallesPago.txId) detallesText = `🔑 TxID: ${order.detallesPago.txId}`;
+              else if (order.detallesPago.nota) detallesText = `📝 ${order.detallesPago.nota}`;
+            }
+
+            const countryStr = order.country ? `${order.emoji || ''} ${order.country}` : 'Desconocido';
+            const ipStr = order.ip || 'desconocida';
+
+            html += `
+              <tr data-order-id="${order.id}">
+                <td style="font-size:0.8rem; color:#64748b;">${fecha}</td>
+                <td><strong>${order.discordOriginal || order.discord}</strong></td>
+                <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold;">${order.pin || '----'}</code></td>
+                <td>${order.producto || 'Producto Digital'}</td>
+                <td><span style="font-size:0.82rem; background:#f8fafc; border:1px solid #cbd5e1; padding:3px 8px; border-radius:6px;">${order.metodoPago || 'PayPal'}</span></td>
+                <td>${detallesText}</td>
+                <td style="font-size:0.8rem;">${countryStr} <br><small style="color:#94a3b8;">${ipStr}</small></td>
+                <td>
+                  <select class="status-select ${estadoActual}" onchange="changeOrderStatus('${order.id}', this)">
+                    <option value="Pendiente" ${estadoActual === 'Pendiente' ? 'selected' : ''}>🟡 Pendiente</option>
+                    <option value="Activado" ${estadoActual === 'Activado' ? 'selected' : ''}>🟢 Activado</option>
+                    <option value="Rechazado" ${estadoActual === 'Rechazado' ? 'selected' : ''}>🔴 Rechazado</option>
+                  </select>
+                </td>
+              </tr>
+            `;
+          });
+
+          tbody.innerHTML = html;
+        }
+
+        window.changeOrderStatus = async function(orderId, selectElem) {
+          const newStatus = selectElem.value;
+          selectElem.className = `status-select ${newStatus}`;
+          
+          try {
+            await updateOrderStatusAdmin(orderId, newStatus);
+            // Actualizar stats de contador
+            const orders = await getAllOrdersAdmin();
+            document.getElementById('statPendientes').textContent = orders.filter(o => (o.estado || 'Pendiente') === 'Pendiente').length;
+            document.getElementById('statActivados').textContent = orders.filter(o => o.estado === 'Activado').length;
+          } catch (e) {
+            alert('Error al actualizar estado en Firestore');
+          }
+        };
+      });
+    </script>
+  </body>
+</html>

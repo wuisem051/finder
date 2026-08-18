@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de Usuario - Laburo Finder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="Animationes.css" />
+    <style>
+      .dashboard-container {
+        width: min(1000px, calc(100% - 32px));
+        margin: 40px auto;
+      }
+      .login-box {
+        max-width: 420px;
+        margin: 60px auto;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+      }
+      .login-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .login-header h2 {
+        margin: 10px 0 4px 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .login-header p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+      .badge-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .badge-pendiente { background: #fef3c7; color: #92400e; }
+      .badge-activado { background: #dcfce7; color: #166534; }
+      .badge-rechazado { background: #fee2e2; color: #991b1b; }
+      
+      .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+      .orders-table th {
+        background: #f8fafc;
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .orders-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        color: #1e293b;
+      }
+      .orders-table tr:last-child td {
+        border-bottom: none;
+      }
+      .user-header-card {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: 24px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
+      }
+      @media (max-width: 600px) {
+        .user-header-card {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+        }
+        .orders-table {
+          display: block;
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <a href="index.html" class="brand" style="text-decoration:none; color:inherit;">
+          <span class="brand-mark">L</span>
+          <span>Laburo Finder</span>
+        </a>
+        <nav class="nav-links">
+          <a href="index.html">Inicio</a>
+          <a href="index.html#pricing">Servicios</a>
+        </nav>
+        <div id="navUserActions">
+          <a class="button button-ghost" href="index.html#pricing">Nueva Compra</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-container">
+      <!-- PANTALLA DE LOGIN / REGISTRO -->
+      <div id="loginScreen" class="login-box">
+        <!-- Pestañas de Login vs Registro -->
+        <div style="display: flex; gap: 8px; background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
+          <button id="tabLoginBtn" type="button" style="flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; background: #ffffff; color: #0f172a; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">Iniciar Sesión</button>
+          <button id="tabRegisterBtn" type="button" style="flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; background: transparent; color: #64748b;">Crear Cuenta</button>
+        </div>
+
+        <!-- FORMULARIO INICIAR SESION -->
+        <div id="formLoginContainer">
+          <div class="login-header">
+            <h2>Panel de Usuario</h2>
+            <p>Ingresa tu Discord y PIN de 4 dígitos para consultar tus pedidos.</p>
+          </div>
+
+          <form id="userLoginForm">
+            <div class="modal-field">
+              <label for="loginDiscord">Usuario de Discord</label>
+              <input type="text" id="loginDiscord" placeholder="Ej. usuario#1234 o @tu_usuario" required />
+            </div>
+
+            <div class="modal-field">
+              <label for="loginPin">PIN (4 dígitos)</label>
+              <input type="password" id="loginPin" maxlength="4" pattern="\d{4}" placeholder="••••" required style="letter-spacing: 0.3em; font-size: 1.1rem; text-align: center;" />
+            </div>
+
+            <button type="submit" class="btn-submit-payment" style="margin-top: 10px;">Ingresar a Mi Panel</button>
+          </form>
+        </div>
+
+        <!-- FORMULARIO CREAR CUENTA -->
+        <div id="formRegisterContainer" style="display: none;">
+          <div class="login-header">
+            <h2>Crear Cuenta Nueva</h2>
+            <p>Regístrate con tu Discord y un PIN de 4 dígitos (sin necesidad de comprar).</p>
+          </div>
+
+          <form id="userRegisterForm">
+            <div class="modal-field">
+              <label for="regDiscord">Usuario de Discord <span style="color:#ef4444">*</span></label>
+              <input type="text" id="regDiscord" placeholder="Ej. usuario#1234 o @tu_usuario" required />
+            </div>
+
+            <div class="modal-field">
+              <label for="regPin">Crea un PIN de 4 dígitos <span style="color:#ef4444">*</span></label>
+              <input type="password" id="regPin" maxlength="4" pattern="\d{4}" placeholder="Ej. 1234" required style="letter-spacing: 0.3em; font-size: 1.1rem; text-align: center;" />
+            </div>
+
+            <div class="modal-field">
+              <label for="regPinConfirm">Confirma tu PIN <span style="color:#ef4444">*</span></label>
+              <input type="password" id="regPinConfirm" maxlength="4" pattern="\d{4}" placeholder="Ej. 1234" required style="letter-spacing: 0.3em; font-size: 1.1rem; text-align: center;" />
+            </div>
+
+            <button type="submit" class="btn-submit-payment" style="margin-top: 10px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">Crear Mi Cuenta</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- PANTALLA DASHBOARD -->
+      <div id="dashboardScreen" style="display: none;">
+        <div class="user-header-card">
+          <div>
+            <span style="font-size:0.85rem; opacity:0.8; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Panel de Control</span>
+            <h2 id="userWelcomeTitle" style="margin:4px 0 0 0; font-size:1.6rem; font-weight:800;">Hola, @usuario</h2>
+          </div>
+          <div>
+            <a href="index.html#pricing" class="button button-primary" style="padding: 8px 16px; font-size: 0.88rem; margin-right: 8px; text-decoration: none;">🛒 Comprar Servicio</a>
+            <button id="logoutBtn" style="background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 10px; font-weight:700; cursor:pointer;">Cerrar Sesión</button>
+          </div>
+        </div>
+
+        <!-- Cesta y Lista de Pedidos -->
+        <div style="margin-bottom: 30px;">
+          <h3 style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">📦 Mi Cesta & Historial de Pedidos</h3>
+          <p style="color: #64748b; font-size: 0.9rem; margin-top:0;">Aquí puedes ver el estado de tus compras y tus servicios digitales.</p>
+
+          <div id="ordersContainer">
+            <!-- La tabla de ordenes se cargara dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { loginAndGetOrders, registerAccount } from './firebase.js';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.getElementById('userLoginForm');
+        const registerForm = document.getElementById('userRegisterForm');
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const ordersContainer = document.getElementById('ordersContainer');
+        const userWelcomeTitle = document.getElementById('userWelcomeTitle');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const tabLoginBtn = document.getElementById('tabLoginBtn');
+        const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+        const formLoginContainer = document.getElementById('formLoginContainer');
+        const formRegisterContainer = document.getElementById('formRegisterContainer');
+
+        // Alternar pestanas Login / Registro
+        tabLoginBtn.addEventListener('click', () => {
+          tabLoginBtn.style.background = '#ffffff';
+          tabLoginBtn.style.color = '#0f172a';
+          tabLoginBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+          tabRegisterBtn.style.background = 'transparent';
+          tabRegisterBtn.style.color = '#64748b';
+          tabRegisterBtn.style.boxShadow = 'none';
+
+          formLoginContainer.style.display = 'block';
+          formRegisterContainer.style.display = 'none';
+        });
+
+        tabRegisterBtn.addEventListener('click', () => {
+          tabRegisterBtn.style.background = '#ffffff';
+          tabRegisterBtn.style.color = '#0f172a';
+          tabRegisterBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+          tabLoginBtn.style.background = 'transparent';
+          tabLoginBtn.style.color = '#64748b';
+          tabLoginBtn.style.boxShadow = 'none';
+
+          formRegisterContainer.style.display = 'block';
+          formLoginContainer.style.display = 'none';
+        });
+
+        // Check session storage
+        const savedDiscord = sessionStorage.getItem('user_discord');
+        const savedPin = sessionStorage.getItem('user_pin');
+
+        if (savedDiscord && savedPin) {
+          loadUserDashboard(savedDiscord, savedPin);
+        }
+
+        // LOGIN
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const discord = document.getElementById('loginDiscord').value.trim();
+          const pin = document.getElementById('loginPin').value.trim();
+
+          if (!discord || !pin || pin.length !== 4) {
+            alert('Por favor ingresa tu Discord y tu PIN de 4 dígitos.');
+            return;
+          }
+
+          const btn = loginForm.querySelector('button');
+          btn.disabled = true;
+          btn.textContent = 'Verificando...';
+
+          try {
+            await loadUserDashboard(discord, pin);
+            sessionStorage.setItem('user_discord', discord);
+            sessionStorage.setItem('user_pin', pin);
+          } catch (err) {
+            if (err.message === 'PIN_INVALID') {
+              alert('El PIN ingresado es incorrecto.');
+            } else {
+              alert('No encontramos una cuenta registrada con esos datos. Puedes presionar "Crear Cuenta" arriba para registrarte.');
+            }
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Ingresar a Mi Panel';
+          }
+        });
+
+        // REGISTRO SIN COMPRA
+        registerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const discord = document.getElementById('regDiscord').value.trim();
+          const pin = document.getElementById('regPin').value.trim();
+          const pinConfirm = document.getElementById('regPinConfirm').value.trim();
+
+          if (!discord) {
+            alert('Por favor ingresa tu nombre de usuario de Discord.');
+            return;
+          }
+
+          if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+            alert('El PIN debe tener exactamente 4 dígitos numéricos.');
+            return;
+          }
+
+          if (pin !== pinConfirm) {
+            alert('Los PINs ingresados no coinciden.');
+            return;
+          }
+
+          const btn = registerForm.querySelector('button');
+          btn.disabled = true;
+          btn.textContent = 'Registrando cuenta...';
+
+          try {
+            await registerAccount(discord, pin);
+            sessionStorage.setItem('user_discord', discord);
+            sessionStorage.setItem('user_pin', pin);
+            alert('¡Cuenta creada exitosamente!');
+            await loadUserDashboard(discord, pin);
+          } catch (err) {
+            alert(err.message || 'No se pudo crear la cuenta.');
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Crear Mi Cuenta';
+          }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('user_discord');
+          sessionStorage.removeItem('user_pin');
+          loginScreen.style.display = 'block';
+          dashboardScreen.style.display = 'none';
+        });
+
+        async function loadUserDashboard(discord, pin) {
+          const userData = await loginAndGetOrders(discord, pin);
+
+          loginScreen.style.display = 'none';
+          dashboardScreen.style.display = 'block';
+          userWelcomeTitle.textContent = `Hola, ${userData.discordOriginal || discord}`;
+
+          renderOrdersTable(userData.orders);
+        }
+
+        function renderOrdersTable(orders) {
+          if (!orders || orders.length === 0) {
+            ordersContainer.innerHTML = `
+              <div style="background: #ffffff; padding: 32px; border-radius: 16px; border: 1px dashed #cbd5e1; text-align: center;">
+                <div style="font-size: 2rem; margin-bottom: 8px;">🛒</div>
+                <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; color: #0f172a;">Tu cesta de compras está vacía</h4>
+                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 16px;">Aún no has realizado ninguna compra con esta cuenta.</p>
+                <a href="index.html#pricing" class="button button-primary" style="display: inline-block; padding: 10px 20px; text-decoration: none;">Ver Servicios y Comprar</a>
+              </div>
+            `;
+            return;
+          }
+
+          let html = `
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Método de Pago</th>
+                  <th>Estado</th>
+                  <th>Detalles</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          orders.forEach(order => {
+            const fecha = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('es-ES') : 'Reciente';
+            const estado = order.estado || 'Pendiente';
+
+            let badgeClass = 'badge-pendiente';
+            if (estado === 'Activado') badgeClass = 'badge-activado';
+            if (estado === 'Rechazado') badgeClass = 'badge-rechazado';
+
+            let detallesText = '-';
+            if (order.detallesPago) {
+              if (order.detallesPago.codigoBinance) detallesText = `Gift Card: ${order.detallesPago.codigoBinance}`;
+              else if (order.detallesPago.txId) detallesText = `TxID: ${order.detallesPago.txId}`;
+              else if (order.detallesPago.nota) detallesText = `Nota: ${order.detallesPago.nota}`;
+            }
+
+            html += `
+              <tr>
+                <td>${fecha}</td>
+                <td><strong>${order.producto || 'Producto Digital'}</strong></td>
+                <td>${order.metodoPago || 'PayPal'}</td>
+                <td><span class="badge-status ${badgeClass}">${estado}</span></td>
+                <td style="font-size:0.85rem; color:#475569;">${detallesText}</td>
+              </tr>
+            `;
+          });
+
+          html += `
+              </tbody>
+            </table>
+          `;
+
+          ordersContainer.innerHTML = html;
+        }
+      });
+    </script>
+  </body>
+</html>
