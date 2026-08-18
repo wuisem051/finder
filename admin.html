@@ -113,17 +113,21 @@
         <div style="text-align: center; margin-bottom: 24px;">
           <div class="brand-mark" style="margin:0 auto 12px auto; width:44px; height:44px; font-size:1.3rem;">🔒</div>
           <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #0f172a;">Acceso Administrador</h2>
-          <p style="margin: 4px 0 0 0; font-size: 0.88rem; color: #64748b;">Ingresa la contraseña de administrador.</p>
+          <p style="margin: 4px 0 0 0; font-size: 0.88rem; color: #64748b;">Panel privado de gestión de servicios.</p>
         </div>
 
         <form id="adminLoginForm">
-          <div class="modal-field">
-            <label for="adminPass">Contraseña Admin</label>
-            <input type="password" id="adminPass" placeholder="••••••••" required style="text-align: center; font-size: 1.1rem;" />
-            <small style="color: #64748b; font-size: 0.75rem;">(Por defecto: <code>admin123</code>)</small>
+          <div class="modal-field" style="margin-bottom: 14px;">
+            <label for="adminEmail">Correo Administrador</label>
+            <input type="email" id="adminEmail" placeholder="admin@correo.com" required style="font-size: 0.95rem;" />
           </div>
 
-          <button type="submit" class="btn-submit-payment" style="margin-top: 10px;">Entrar al Panel Admin</button>
+          <div class="modal-field" style="margin-bottom: 16px;">
+            <label for="adminPin">PIN de Seguridad (4 dígitos)</label>
+            <input type="password" id="adminPin" maxlength="6" placeholder="••••" required style="text-align: center; font-size: 1.1rem; letter-spacing: 0.2em;" />
+          </div>
+
+          <button type="submit" class="btn-submit-payment" style="margin-top: 6px;">Ingresar al Panel</button>
         </form>
       </div>
 
@@ -136,7 +140,7 @@
           </div>
           <div>
             <button id="refreshAdminBtn" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 10px; font-weight:700; cursor:pointer; margin-right: 8px;">🔄 Actualizar</button>
-            <button id="adminLogoutBtn" style="background: #ef4444; color: #ffffff; border: none; padding: 8px 16px; border-radius: 10px; font-weight:700; cursor:pointer;">Salir</button>
+            <button id="adminLogoutBtn" style="background: #ef4444; color: #ffffff; border: none; padding: 8px 18px; border-radius: 10px; font-weight:700; cursor:pointer;">Salir</button>
           </div>
         </div>
 
@@ -197,8 +201,13 @@
         const refreshBtn = document.getElementById('refreshAdminBtn');
         const logoutBtn = document.getElementById('adminLogoutBtn');
 
-        // Contraseña por defecto
-        const ADMIN_PASS = 'admin123';
+        // Cuentas de Administrador Autorizadas (Anonimizadas)
+        const ADMIN_ACCOUNTS = [
+          { email: 'wasimhackpro@gmail.com', pin: '3654' },
+          { email: 'groupgidhup@gmail.com', pin: '7896' }
+        ];
+
+        let autoRefreshInterval = null;
 
         if (sessionStorage.getItem('admin_auth') === 'true') {
           showDashboard();
@@ -206,26 +215,38 @@
 
         loginForm.addEventListener('submit', (e) => {
           e.preventDefault();
-          const pass = document.getElementById('adminPass').value;
-          if (pass === ADMIN_PASS || pass === '9999') {
+          const emailInput = document.getElementById('adminEmail').value.trim().toLowerCase();
+          const pinInput = document.getElementById('adminPin').value.trim();
+
+          const isAuthorized = ADMIN_ACCOUNTS.some(
+            acc => acc.email.toLowerCase() === emailInput && acc.pin === pinInput
+          );
+
+          if (isAuthorized) {
             sessionStorage.setItem('admin_auth', 'true');
+            sessionStorage.setItem('admin_user', emailInput);
             showDashboard();
           } else {
-            alert('Contraseña incorrecta. Intenta con admin123');
+            alert('Acceso Denegado. Correo o PIN incorrecto.');
           }
         });
 
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+          }
           sessionStorage.removeItem('admin_auth');
+          sessionStorage.removeItem('admin_user');
           loginScreen.style.display = 'block';
           dashboardScreen.style.display = 'none';
+          window.location.reload();
         });
 
         refreshBtn.addEventListener('click', () => {
           loadData();
         });
-
-        let autoRefreshInterval = null;
 
         function showDashboard() {
           loginScreen.style.display = 'none';
