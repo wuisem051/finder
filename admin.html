@@ -225,36 +225,59 @@
           loadData();
         });
 
+        let autoRefreshInterval = null;
+
         function showDashboard() {
           loginScreen.style.display = 'none';
           dashboardScreen.style.display = 'block';
           loadData();
+
+          // Auto actualizar cada 10 segundos
+          if (!autoRefreshInterval) {
+            autoRefreshInterval = setInterval(loadData, 10000);
+          }
         }
 
         async function loadData() {
+          let orders = [];
+          let visits = [];
+
+          // Cargar compras de forma independiente
           try {
-            const [orders, visits] = await Promise.all([
-              getAllOrdersAdmin(),
-              getAllVisitsAdmin()
-            ]);
-
-            // Stats
-            document.getElementById('statTotalCompras').textContent = orders.length;
-            document.getElementById('statPendientes').textContent = orders.filter(o => (o.estado || 'Pendiente') === 'Pendiente').length;
-            document.getElementById('statActivados').textContent = orders.filter(o => o.estado === 'Activado').length;
-            document.getElementById('statTotalVisitas').textContent = visits.length;
-
-            renderOrdersTable(orders);
-          } catch (error) {
-            console.error('Error cargando datos admin:', error);
+            orders = await getAllOrdersAdmin();
+          } catch (err) {
+            console.warn('Error al cargar ordenes:', err);
           }
+
+          // Cargar visitas de forma independiente
+          try {
+            visits = await getAllVisitsAdmin();
+          } catch (err) {
+            console.warn('Error al cargar visitas:', err);
+          }
+
+          // Actualizar contadores
+          document.getElementById('statTotalCompras').textContent = orders.length;
+          document.getElementById('statPendientes').textContent = orders.filter(o => (o.estado || 'Pendiente') === 'Pendiente').length;
+          document.getElementById('statActivados').textContent = orders.filter(o => o.estado === 'Activado').length;
+          document.getElementById('statTotalVisitas').textContent = visits.length;
+
+          renderOrdersTable(orders);
         }
 
         function renderOrdersTable(orders) {
           const tbody = document.getElementById('adminOrdersTbody');
 
-          if (orders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">No hay compras registradas en Firestore aún.</td></tr>';
+          if (!orders || orders.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="8" style="text-align:center; padding:30px; color:#64748b;">
+                  <div style="font-size:1.8rem; margin-bottom:6px;">📦</div>
+                  <strong>No hay compras registradas aún.</strong><br>
+                  <small style="color:#94a3b8;">Las nuevas compras realizadas desde la tienda aparecerán aquí automáticamente.</small>
+                </td>
+              </tr>
+            `;
             return;
           }
 
@@ -265,8 +288,8 @@
 
             let detallesText = '-';
             if (order.detallesPago) {
-              if (order.detallesPago.codigoBinance) detallesText = `🎁 GiftCard: <strong>${order.detallesPago.codigoBinance}</strong>`;
-              else if (order.detallesPago.txId) detallesText = `🔑 TxID: ${order.detallesPago.txId}`;
+              if (order.detallesPago.codigoBinance) detallesText = `🎁 GiftCard: <strong style="color:#2563eb;">${order.detallesPago.codigoBinance}</strong>`;
+              else if (order.detallesPago.txId) detallesText = `🔑 TxID: <code>${order.detallesPago.txId}</code>`;
               else if (order.detallesPago.nota) detallesText = `📝 ${order.detallesPago.nota}`;
             }
 
@@ -276,16 +299,16 @@
             html += `
               <tr data-order-id="${order.id}">
                 <td style="font-size:0.8rem; color:#64748b;">${fecha}</td>
-                <td><strong>${order.discordOriginal || order.discord}</strong></td>
+                <td><strong>${order.discordOriginal || order.discord || 'Sin Discord'}</strong></td>
                 <td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold;">${order.pin || '----'}</code></td>
-                <td>${order.producto || 'Producto Digital'}</td>
-                <td><span style="font-size:0.82rem; background:#f8fafc; border:1px solid #cbd5e1; padding:3px 8px; border-radius:6px;">${order.metodoPago || 'PayPal'}</span></td>
+                <td><strong style="color:#0f172a;">${order.producto || 'Producto Digital'}</strong></td>
+                <td><span style="font-size:0.82rem; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:4px 8px; border-radius:6px; font-weight:bold;">${order.metodoPago || 'PayPal'}</span></td>
                 <td>${detallesText}</td>
                 <td style="font-size:0.8rem;">${countryStr} <br><small style="color:#94a3b8;">${ipStr}</small></td>
                 <td>
                   <select class="status-select ${estadoActual}" onchange="changeOrderStatus('${order.id}', this)">
                     <option value="Pendiente" ${estadoActual === 'Pendiente' ? 'selected' : ''}>🟡 Pendiente</option>
-                    <option value="Activado" ${estadoActual === 'Activado' ? 'selected' : ''}>🟢 Activado</option>
+                    <option value="Activado" ${estadoActual === 'Activado' ? 'selected' : ''}>🟢 Pago Recibido / Activado</option>
                     <option value="Rechazado" ${estadoActual === 'Rechazado' ? 'selected' : ''}>🔴 Rechazado</option>
                   </select>
                 </td>
@@ -302,12 +325,10 @@
           
           try {
             await updateOrderStatusAdmin(orderId, newStatus);
-            // Actualizar stats de contador
-            const orders = await getAllOrdersAdmin();
-            document.getElementById('statPendientes').textContent = orders.filter(o => (o.estado || 'Pendiente') === 'Pendiente').length;
-            document.getElementById('statActivados').textContent = orders.filter(o => o.estado === 'Activado').length;
+            // Re-cargar datos inmediatamente
+            await loadData();
           } catch (e) {
-            alert('Error al actualizar estado en Firestore');
+            alert('Error al actualizar el estado de la orden');
           }
         };
       });
