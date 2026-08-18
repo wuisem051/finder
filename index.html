@@ -362,6 +362,7 @@
         const modal = document.getElementById('paymentModal');
         const planSelect = document.getElementById('planSelect');
         const discordInput = document.getElementById('discordInput');
+        const pinInput = document.getElementById('pinInput');
         const formScreen = document.getElementById('modalFormScreen');
         const successScreen = document.getElementById('modalSuccessScreen');
 
@@ -371,11 +372,17 @@
           if (matchingOption) planSelect.value = matchingOption.value;
         }
 
+        // Auto-completar Discord y PIN si el usuario ya esta autenticado
+        const savedDiscord = sessionStorage.getItem('user_discord');
+        const savedPin = sessionStorage.getItem('user_pin');
+        if (savedDiscord && discordInput) discordInput.value = savedDiscord;
+        if (savedPin && pinInput) pinInput.value = savedPin;
+
         // Reset screens
         formScreen.style.display = 'block';
         successScreen.style.display = 'none';
 
-        // Mostrar modal
+        // Mostrar modal pasarela
         modal.classList.add('active');
       }
 
@@ -546,8 +553,8 @@
         <!-- Formulario de Pago -->
         <div id="modalFormScreen">
           <div class="modal-header">
-            <h3>Completar Orden</h3>
-            <p>Selecciona tu método de pago preferido para activar tu acceso.</p>
+            <h3>Pasarela de Pago</h3>
+            <p>Selecciona tu método de pago preferido para completar tu orden.</p>
           </div>
 
           <div class="modal-field">
@@ -560,19 +567,9 @@
             </select>
           </div>
 
+          <!-- Metodos de Pago (Visible de inmediato) -->
           <div class="modal-field">
-            <label for="discordInput">Usuario de Discord <span style="color:#ef4444">*</span></label>
-            <input type="text" id="discordInput" placeholder="Ej. usuario#1234 o @tu_usuario" required />
-          </div>
-
-          <div class="modal-field">
-            <label for="pinInput">PIN de Acceso (4 dígitos) <span style="color:#ef4444">*</span></label>
-            <input type="password" id="pinInput" maxlength="4" pattern="\d{4}" placeholder="Ej. 1234 (para acceder a tu panel)" required style="letter-spacing: 0.2em; font-weight: bold;" />
-            <small style="color: #64748b; font-size: 0.78rem;">Guarda este PIN. Te servirá para ingresar a tu panel de usuario.</small>
-          </div>
-
-          <div class="modal-field">
-            <label>Método de Pago</label>
+            <label>Selecciona Método de Pago</label>
             <div class="payment-methods-grid">
               <div class="pm-card selected" data-method="paypal">
                 <span class="pm-icon">💳</span>
@@ -642,7 +639,21 @@
             </div>
           </div>
 
-          <button type="button" class="btn-submit-payment" id="confirmPaymentBtn">Confirmar y Registrar Pago</button>
+          <!-- Datos de Activacion -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+            <div class="modal-field" style="margin-bottom: 12px;">
+              <label for="discordInput">Usuario de Discord <span style="color:#ef4444">*</span></label>
+              <input type="text" id="discordInput" placeholder="Ej. usuario#1234 o @tu_usuario" required />
+            </div>
+
+            <div class="modal-field" style="margin-bottom: 0;">
+              <label for="pinInput">PIN de Acceso (4 dígitos) <span style="color:#ef4444">*</span></label>
+              <input type="password" id="pinInput" maxlength="4" pattern="\d{4}" placeholder="Ej. 1234 (para acceder a tu panel)" required style="letter-spacing: 0.2em; font-weight: bold;" />
+              <small style="color: #64748b; font-size: 0.78rem;">Servirá para ver el estado de tu servicio en tu panel.</small>
+            </div>
+          </div>
+
+          <button type="button" class="btn-submit-payment" id="confirmPaymentBtn">Pagar y Registrar Orden</button>
         </div>
 
         <!-- Pantalla de Éxito / Estado Pendiente -->
