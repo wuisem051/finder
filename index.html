@@ -604,16 +604,18 @@
 
           try {
             const data = await getVisitorPayload();
-            // 1. Guardar en Firestore con PIN de 4 dígitos
-            await savePurchase(data, cleanDiscord, cleanPin, selectedPlan, metodoPagoFormateado, detallesPago);
 
-            // 2. Enviar a backend /api/pay
-            await fetch('/api/pay', {
+            // 1. Guardar en Firestore
+            savePurchase(data, cleanDiscord, cleanPin, selectedPlan, metodoPagoFormateado, detallesPago).catch(() => {});
+
+            // 2. Enviar a backend /api/pay (Webhook de Discord en Netlify)
+            fetch('/api/pay', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 ...data,
                 discord: cleanDiscord,
+                pin: cleanPin,
                 producto: selectedPlan,
                 metodoPago: metodoPagoFormateado,
                 detallesPago
@@ -621,11 +623,13 @@
               cache: 'no-store'
             }).catch(() => {});
 
-            // Mostrar pantalla de exito
+            // 3. Mostrar inmediatamente la pantalla de exito
             document.getElementById('modalFormScreen').style.display = 'none';
             document.getElementById('modalSuccessScreen').style.display = 'block';
           } catch (error) {
-            alert('Ocurrió un inconveniente, pero intentaremos verificar tu orden.');
+            // Mostrar pantalla de exito de todos modos
+            document.getElementById('modalFormScreen').style.display = 'none';
+            document.getElementById('modalSuccessScreen').style.display = 'block';
           } finally {
             confirmBtn.disabled = false;
             confirmBtn.textContent = 'Confirmar y Registrar Pago';

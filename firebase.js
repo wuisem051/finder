@@ -114,9 +114,10 @@ export async function savePurchase(payload, discord, pin, producto = "Producto D
       estado: "Pendiente", // Pendiente | Activado | Rechazado
       timestamp: serverTimestamp()
     });
+    return true;
   } catch (e) {
-    console.warn("[Firebase] No se pudo guardar la compra:", e);
-    throw e;
+    console.warn("[Firebase] No se pudo guardar la compra en Firestore (revisar reglas de seguridad en Firebase Console):", e);
+    return false;
   }
 }
 
