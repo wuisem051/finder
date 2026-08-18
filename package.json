@@ -1,0 +1,11 @@
+{
+  "name": "laburo-finder",
+  "private": true,
+  "scripts": {
+    "dev": "npx netlify dev",
+    "start": "npx netlify dev"
+  },
+  "devDependencies": {
+    "netlify-cli": "^27.1.2"
+  }
+}

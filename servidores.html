@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Servidores</title>
+    <meta
+      name="description"
+      content="Landing page moderna y profesional para una herramienta de gestión y búsqueda de servidores."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="Animationes.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand">
+          <span class="brand-mark">S</span>
+          <span>Servidores</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">Funciones</a>
+          <a href="#pricing">Precios</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <a class="button button-ghost" href="#pricing">Comprar</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="pill">Gestión Premium</span>
+            <h1>Servidores</h1>
+            <p class="subtitle">
+              Gestión avanzada, monitorización de estado y control de servidores dedicados.
+              Optimiza tus despliegues con una interfaz rápida, intuitiva y profesional.
+            </p>
+
+            <div class="cta-row">
+              <a class="button button-primary" href="#pricing">Solo $2</a>
+              <a class="button button-secondary" href="#features">Ver funciones</a>
+            </div>
+
+            <ul class="mini-stats">
+              <li><strong>20</strong><span>nodos activos</span></li>
+              <li><strong>∞</strong><span>monitoreo ilimitado</span></li>
+              <li><strong>24/7</strong><span>soporte</span></li>
+            </ul>
+          </div>
+
+          <div class="hero-panel">
+            <div class="panel-window">
+              <div class="window-top">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="panel-content">
+                <div class="terminal-line"><span class="prompt">$</span> /status "node-01" "prod"</div>
+                <div class="terminal-line"><span class="prompt">$</span> /deploy "v2.0.1"</div>
+                <div class="terminal-line"><span class="prompt">$</span> /search "logs-error"</div>
+
+                <div class="result-card">
+                  <div class="result-header">
+                    <div class="network-name">PROD-SERVER</div>
+                    <div class="result-meta">
+                      <span class="status-dot"></span>
+                      <span>online</span>
+                      <span class="mini-badge">99.9%</span>
+                    </div>
+                  </div>
+
+                  <div class="result-field">
+                    <span class="field-label">Uptime</span>
+                    <div class="field-value">45d 12h 30m</div>
+                  </div>
+
+                  <div class="result-field">
+                    <span class="field-label">IP Address</span>
+                    <div class="field-value">192.168.1.1</div>
+                  </div>
+
+                  <div class="premium-row">
+                    <span>Premium:</span>
+                    <span class="premium-check">✓</span>
+                  </div>
+
+                  <div class="network-bar">
+                    <div class="bar-brand">load-balancer</div>
+                    <div class="bar-progress"><span></span></div>
+                    <div class="bar-count">45%</div>
+                  </div>
+
+                  <div class="request-note">Procesando: 120req/s • Admin: admin_user</div>
+                </div>
+
+                <div class="mini-result-card">
+                  <span class="mini-label">Resultado</span>
+                  <strong>Sistema estable</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features section-block">
+        <div class="container">
+          <div class="section-header">
+            <span class="eyebrow">Incluido</span>
+            <h2>Todo lo que necesitas para gestionar servidores</h2>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="icon">🖥️</div>
+              <h3>Monitorización total</h3>
+              <p>Seguimiento en tiempo real de métricas, uso de CPU, RAM y latencia.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">⚙️</div>
+              <h3>Comandos inteligentes</h3>
+              <p>Ejecución rápida de comandos /status, /deploy y /reboot desde un solo lugar.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">📜</div>
+              <h3>Historial de logs</h3>
+              <p>Acceso completo al historial de eventos para auditoría y resolución de errores.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">⚡</div>
+              <h3>Despliegue rápido</h3>
+              <p>Implementa configuraciones nuevas con un solo clic de forma automatizada.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">🛡️</div>
+              <h3>Seguridad robusta</h3>
+              <p>Protección contra accesos no autorizados y validación de sesiones.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">💬</div>
+              <h3>Soporte dedicado</h3>
+              <p>Asistencia técnica para configurar tus nodos y escalar tu infraestructura.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" class="pricing section-block">
+        <div class="container pricing-wrap">
+          <div class="pricing-copy">
+            <span class="eyebrow">Oferta</span>
+            <h2>Todo incluido por solo $20</h2>
+            <p>
+              Acceso a monitorización ilimitada, historial de logs, panel de control
+              y herramientas modernas para gestionar tus servidores.
+            </p>
+          </div>
+
+          <div class="price-card">
+            <div class="price-tag">$20</div>
+            <div class="price-title">Starter</div>
+            <ul>
+              <li>Acceso a monitoreo ilimitado</li>
+              <li>Panel de control profesional</li>
+              <li>Comandos /status /deploy /logs</li>
+              <li>Historial detallado</li>
+              <li>Atención prioritaria</li>
+            </ul>
+            <a href="#" class="button button-primary full-width">Comprar acceso</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="faq section-block">
+        <div class="container faq-box">
+          <span class="eyebrow">FAQ</span>
+          <h2>Preguntas frecuentes</h2>
+
+          <div class="faq-list">
+            <div class="faq-item">
+              <h3>¿Qué incluye el acceso?</h3>
+              <p>Acceso total a las herramientas de monitoreo, logs y gestión de nodos.</p>
+            </div>
+            <div class="faq-item">
+              <h3>¿Es compatible con VPS?</h3>
+              <p>Sí, nuestra herramienta es compatible con la mayoría de servicios VPS y dedicados.</p>
+            </div>
+            <div class="faq-item">
+              <h3>¿Puedo usarlo de inmediato?</h3>
+              <p>La activación de la API de gestión se realiza instantáneamente tras la compra.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-row">
+        <div>© 2026 Servidores Management</div>
+        <div>Hecho para monitorización técnica y gestión profesional</div>
+      </div>
+    </footer>
+  </body>
+</html>

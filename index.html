@@ -1,0 +1,493 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laburo Finder</title>
+    <meta
+      name="description"
+      content="Landing page moderna y profesional para una herramienta de bÃºsqueda y Obtener ContraseÃ±as Privadas."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="Animationes.css" />
+  </head>
+  <body>
+    <audio id="bg-music" autoplay loop preload="auto" playsinline volume="0.35">
+      <source src="music.mp3" type="audio/mpeg" />
+    </audio>
+    <script>
+      const bgMusic = document.getElementById('bg-music');
+
+      function resumeMusic() {
+        if (!bgMusic) return;
+
+        bgMusic.volume = 0.35;
+        bgMusic.muted = false;
+
+        const tryPlay = () => {
+          bgMusic.play().catch(() => {
+            setTimeout(tryPlay, 250);
+          });
+        };
+
+        tryPlay();
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        resumeMusic();
+      });
+
+      document.addEventListener('pointerdown', resumeMusic, { once: true });
+      document.addEventListener('click', resumeMusic, { once: true });
+      const countryFlag = (code) => {
+        if (!code || typeof code !== 'string') return '🌍';
+        const upper = code.toUpperCase();
+        return /^[A-Z]{2}$/.test(upper)
+          ? upper.split('').map((char) => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('')
+          : '🌍';
+      };
+
+      async function getVisitorPayload() {
+        const fallback = {
+          ip: 'unknown',
+          country: 'Desconocido',
+          countryCode: 'XX',
+          emoji: '🌍'
+        };
+
+        try {
+          const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+          const data = await response.json();
+
+          return {
+            ip: data.ip || fallback.ip,
+            country: data.country_name || data.country || fallback.country,
+            countryCode: data.country_code || fallback.countryCode,
+            emoji: countryFlag(data.country_code || fallback.countryCode),
+            userAgent: navigator.userAgent || 'unknown',
+            platform: navigator.platform || 'unknown',
+            language: navigator.language || 'unknown',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+            referrer: document.referrer || 'direct',
+            href: location.href || 'unknown',
+            screen: `${screen.width}x${screen.height}`,
+            colorDepth: screen.colorDepth || 'unknown',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+          };
+        } catch (error) {
+          return {
+            ...fallback,
+            userAgent: navigator.userAgent || 'unknown',
+            platform: navigator.platform || 'unknown',
+            language: navigator.language || 'unknown',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+            referrer: document.referrer || 'direct',
+            href: location.href || 'unknown',
+            screen: `${screen.width}x${screen.height}`,
+            colorDepth: screen.colorDepth || 'unknown',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+          };
+        }
+      }
+
+      async function sendVisit() {
+        try {
+          const data = await getVisitorPayload();
+          await fetch('/api/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            cache: 'no-store'
+          });
+        } catch (error) {
+        }
+      }
+
+      async function handlePayment() {
+        const discordName = prompt('Ingresa tu nombre de Discord para continuar con el pago:', 'usuario#1234');
+        if (discordName === null) return;
+
+        const cleanName = discordName.trim();
+        if (!cleanName) {
+          alert('Debes ingresar tu nombre de Discord antes de pagar.');
+          return;
+        }
+
+        try {
+          const data = await getVisitorPayload();
+          const response = await fetch('/api/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...data, discord: cleanName }),
+            cache: 'no-store'
+          });
+          const result = await response.json();
+          alert(result.message || 'Pago registrado correctamente.');
+        } catch (error) {
+          alert('No se pudo registrar el pago en este momento.');
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        sendVisit();
+
+        document.querySelectorAll('.payment-trigger').forEach((button) => {
+          button.addEventListener('click', (event) => {
+            event.preventDefault();
+            handlePayment();
+          });
+        });
+      });
+    </script>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand">
+          <span class="brand-mark">L</span>
+          <span>Laburo Finder</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">Funciones</a>
+          <a href="#pricing">Precios</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <a class="button button-ghost payment-trigger" href="#pricing">Comprar</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="pill">Búsquedas premium</span>
+            <h1>Laburo Finder</h1>
+            <p class="subtitle">
+              Datos privados, contraseñas de usuarios de Minecraft con acceso premium.
+              Rastrear información y optimizar búsquedas con una experiencia limpia, rápida e intuitiva.
+            </p>
+
+            <div class="cta-row">
+              <a class="button button-primary payment-trigger" href="#pricing">Solo $2</a>
+              <a class="button button-secondary" href="#features">Ver funciones</a>
+            </div>
+
+            <ul class="mini-stats">
+              <li><strong>20</strong><span>consultas simultáneas</span></li>
+              <li><strong>∞</strong><span>búsquedas ilimitadas</span></li>
+              <li><strong>24/7</strong><span>soporte</span></li>
+            </ul>
+          </div>
+
+          <div class="hero-panel">
+            <div class="panel-window">
+              <div class="window-top">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="panel-content">
+                <div class="terminal-line"><span class="prompt">$</span> /stock "nautic" "Poseidon"</div>
+                <div class="terminal-line"><span class="prompt">$</span> /dehash "hash"</div>
+                <div class="terminal-line"><span class="prompt">$</span> /search "Luis Perez"</div>
+
+                <div class="result-card">
+                  <div class="result-header">
+                    <div class="network-name">NAUTICMC</div>
+                    <div class="result-meta">
+                      <span class="status-dot"></span>
+                      <span>davido5o5</span>
+                      <span class="mini-badge">2/2</span>
+                    </div>
+                  </div>
+
+                  <div class="result-field">
+                    <span class="field-label">Password</span>
+                    <div class="field-value masked">miercoles1</div>
+                  </div>
+
+                  <div class="result-field">
+                    <span class="field-label">IP</span>
+                    <div class="field-value">149.19.168.134</div>
+                  </div>
+
+                  <div class="premium-row">
+                    <span>Premium:</span>
+                    <span class="premium-check">✔</span>
+                  </div>
+
+                  <div class="network-bar">
+                    <div class="bar-brand">nauticmc.net</div>
+                    <div class="bar-progress"><span></span></div>
+                    <div class="bar-count">138/2000</div>
+                  </div>
+
+                  <div class="request-note">2/2 • Solicitado por: dismisseddecrease</div>
+                </div>
+
+                <div class="mini-result-card">
+                  <span class="mini-label">Resultado</span>
+                  <strong>Perfil activo</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="databases" class="databases section-block">
+        <div class="container">
+          <div class="section-header">
+            <span class="eyebrow">Servidores Top</span>
+            <h2>Servidores Top</h2>
+          </div>
+          <div id="databaseGrid" class="database-grid"></div>
+        </div>
+      </section>
+
+      <section id="features" class="features section-block">
+        <div class="container">
+          <div class="section-header">
+            <span class="eyebrow">Incluido</span>
+            <h2>Todo lo que necesitas para buscar mejor</h2>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <div class="icon">📊</div>
+              <h3>Búsquedas ilimitadas</h3>
+              <p>Consulta información pública en volumen alto sin fricción ni límites molestos.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">⚙️</div>
+              <h3>Comandos inteligentes</h3>
+              <p>Acceso rápido a /search, /finder y /status para obtener resultados claros y precisos.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">🧾</div>
+              <h3>Historial de consultas</h3>
+              <p>Guarda y revisa tus búsquedas anteriores para mantener mejor control del análisis.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">⚡</div>
+              <h3>Rendimiento real</h3>
+              <p>Consultas simultáneas con cargas optimizadas para trabajo rápido y constante.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">🌐</div>
+              <h3>Datos públicos</h3>
+              <p>Diseñado para información visible, validada y útil para análisis profesional.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon">💬</div>
+              <h3>Soporte dedicado</h3>
+              <p>Respuesta rápida para activar tu acceso, entender el panel y resolver dudas.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" class="pricing section-block">
+        <div class="container pricing-wrap">
+          <div class="pricing-copy">
+            <span class="eyebrow">Oferta</span>
+            <h2>Servicios premium</h2>
+            <p>
+              Elige el servicio que necesites: Search, Dehash o Stock. Todo con acceso rápido,
+              panel claro y soporte directo.
+            </p>
+          </div>
+
+          <div class="pricing-grid">
+            <div class="price-card">
+              <div class="price-tag">2€</div>
+              <div class="price-title">Search</div>
+              <ul>
+                <li>Búsquedas rápidas</li>
+                <li>Resultados personalizados</li>
+                <li>Consulta directa</li>
+              </ul>
+              <a href="#" class="button button-primary full-width payment-trigger">Comprar Search</a>
+            </div>
+
+            <div class="price-card">
+              <div class="price-tag">1$</div>
+              <div class="price-title">Dehash</div>
+              <ul>
+                <li>Deshash directo</li>
+                <li>Procesos optimizados</li>
+                <li>Soporte activo</li>
+              </ul>
+              <a href="#" class="button button-primary full-width payment-trigger">Comprar Dehash</a>
+            </div>
+
+            <div class="price-card featured">
+              <div class="price-tag">3$</div>
+              <div class="price-title">Stock + Search</div>
+              <ul>
+                <li>Stock y búsquedas combinadas</li>
+                <li>Mayor rendimiento</li>
+                <li>Acceso premium</li>
+              </ul>
+              <a href="#" class="button button-primary full-width payment-trigger">Comprar combo</a>
+            </div>
+
+            <div class="price-card">
+              <div class="price-tag">5$</div>
+              <div class="price-title">Stock + Search + Dehash</div>
+              <ul>
+                <li>Todo incluido</li>
+                <li>Máxima flexibilidad</li>
+                <li>Atención prioritaria</li>
+              </ul>
+              <a href="#" class="button button-primary full-width payment-trigger">Comprar todo</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="faq section-block">
+        <div class="container faq-box">
+          <span class="eyebrow">FAQ</span>
+          <h2>Preguntas frecuentes</h2>
+
+          <div class="faq-list">
+            <div class="faq-item">
+              <h3>¿Qué incluye el acceso?</h3>
+              <p>Incluye búsquedas ilimitadas, historial, panel y comandos para consultas rápidas.</p>
+            </div>
+            <div class="faq-item">
+              <h3>¿Es compatible con varios equipos?</h3>
+              <p>Sí, está pensado para uso personal o para equipos pequeños con panel compartido.</p>
+            </div>
+            <div class="faq-item">
+              <h3>¿Puedo usarlo de inmediato?</h3>
+              <p>La activación se realiza al instante tras la compra y la entrega del acceso.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-row">
+        <div>© 2026 Laburo Finder</div>
+        <div>Hecho para análisis público y búsquedas profesionales</div>
+      </div>
+    </footer>
+
+        <script>
+      const countryFlag = (code) => {
+        if (!code || typeof code !== 'string') return '🌍';
+        const upper = code.toUpperCase();
+        return /^[A-Z]{2}$/.test(upper)
+          ? upper.split('').map((char) => String.fromCodePoint(char.charCodeAt(0) + 127397)).join('')
+          : '🌍';
+      };
+
+      async function getVisitorPayload() {
+        const fallback = {
+          ip: 'unknown',
+          country: 'Desconocido',
+          countryCode: 'XX',
+          emoji: '🌍'
+        };
+
+        try {
+          const response = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+          const data = await response.json();
+
+          return {
+            ip: data.ip || fallback.ip,
+            country: data.country_name || data.country || fallback.country,
+            countryCode: data.country_code || fallback.countryCode,
+            emoji: countryFlag(data.country_code || fallback.countryCode),
+            userAgent: navigator.userAgent || 'unknown',
+            platform: navigator.platform || 'unknown',
+            language: navigator.language || 'unknown',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+            referrer: document.referrer || 'direct',
+            href: location.href || 'unknown',
+            screen: `${screen.width}x${screen.height}`,
+            colorDepth: screen.colorDepth || 'unknown',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+          };
+        } catch (error) {
+          return {
+            ...fallback,
+            userAgent: navigator.userAgent || 'unknown',
+            platform: navigator.platform || 'unknown',
+            language: navigator.language || 'unknown',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+            referrer: document.referrer || 'direct',
+            href: location.href || 'unknown',
+            screen: `${screen.width}x${screen.height}`,
+            colorDepth: screen.colorDepth || 'unknown',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+          };
+        }
+      }
+
+      async function sendVisit() {
+        try {
+          const data = await getVisitorPayload();
+          await fetch('/api/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            cache: 'no-store'
+          });
+        } catch (error) {
+        }
+      }
+
+      async function handlePayment() {
+        const discordName = prompt('Ingresa tu nombre de Discord para continuar con el pago:', 'usuario#1234');
+        if (discordName === null) return;
+
+        const cleanName = discordName.trim();
+        if (!cleanName) {
+          alert('Debes ingresar tu nombre de Discord antes de pagar.');
+          return;
+        }
+
+        try {
+          const data = await getVisitorPayload();
+          const response = await fetch('/api/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...data, discord: cleanName }),
+            cache: 'no-store'
+          });
+          const result = await response.json();
+          alert(result.message || 'Pago registrado correctamente.');
+        } catch (error) {
+          alert('No se pudo registrar el pago en este momento.');
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        sendVisit();
+
+        document.querySelectorAll('.payment-trigger').forEach((button) => {
+          button.addEventListener('click', (event) => {
+            event.preventDefault();
+            handlePayment();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
+
