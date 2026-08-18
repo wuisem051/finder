@@ -290,7 +290,9 @@
       </div>
     </footer>
 
-        <script>
+    <script type="module">
+      import { saveVisit, savePurchase } from './firebase.js';
+
       const countryFlag = (code) => {
         if (!code || typeof code !== 'string') return '🌍';
         const upper = code.toUpperCase();
