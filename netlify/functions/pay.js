@@ -14,21 +14,43 @@ function sendDiscord(data) {
     else if (data.detallesPago.nota) detallesFormatted = `Nota: ${data.detallesPago.nota}`;
   }
 
+  let embedTitle = '💳 Nuevo registro de pago';
+  let embedColor = 15380232; // Amarillo por defecto
+  let statusText = data.estado || 'Pendiente';
+
+  if (data.type === 'status_update') {
+    if (statusText === 'Activado') {
+      embedTitle = '🟢 PAGO VERIFICADO Y ACTIVADO 🎉';
+      embedColor = 2278750; // Verde
+    } else if (statusText === 'Rechazado') {
+      embedTitle = '🔴 COMPRA RECHAZADA';
+      embedColor = 15679300; // Rojo
+    } else {
+      embedTitle = '🟡 COMPRA EN REVISIÓN (PENDIENTE)';
+      embedColor = 15380232; // Amarillo
+    }
+  }
+
+  const payloadLines = [
+    `**Discord:** ${data.discord || 'Sin nombre'}`,
+    `**Producto:** ${data.producto || 'Producto Digital'}`,
+    `**Estado:** ${statusText.toUpperCase()}`,
+    `**Método de Pago:** ${data.metodoPago || 'PayPal'}`,
+    `**Detalles / GiftCard:** ${detallesFormatted}`
+  ];
+
+  if (data.ip && data.ip !== 'unknown') {
+    payloadLines.push(`**IP / País:** ${data.emoji || '🌍'} ${data.country || 'Desconocido'} (${data.ip})`);
+  }
+
+  payloadLines.push(`**Hora:** ${new Date().toLocaleString('es-ES')}`);
+
   const payload = JSON.stringify({
-    username: 'Laburo Finder',
+    username: 'Laburo Finder Bot',
     embeds: [{
-      title: '💳 Nuevo registro de pago',
-      description: [
-        `**Discord:** ${data.discord || 'Sin nombre'}`,
-        `**Producto:** ${data.producto || 'Producto Digital'}`,
-        `**Método de Pago:** ${data.metodoPago || 'PayPal'}`,
-        `**Detalles / GiftCard:** ${detallesFormatted}`,
-        `**IP:** ${data.ip || 'unknown'}`,
-        `**País:** ${data.emoji || '🌍'} ${data.country || 'Desconocido'}`,
-        `**Dispositivo:** ${data.platform || 'unknown'} (${data.userAgent || 'unknown'})`,
-        `**Hora:** ${new Date().toLocaleString('es-ES')}`
-      ].join('\n'),
-      color: 3066993,
+      title: embedTitle,
+      description: payloadLines.join('\n'),
+      color: embedColor,
       timestamp: new Date().toISOString()
     }]
   });
@@ -78,19 +100,14 @@ exports.handler = async function (event) {
   }
 
   const data = {
+    type: body.type || 'new_purchase',
+    estado: body.estado || 'Pendiente',
     ip: body.ip || 'unknown',
     country: body.country || 'Desconocido',
     countryCode: body.countryCode || 'XX',
     emoji: body.emoji || '🌍',
     userAgent: body.userAgent || 'unknown',
     platform: body.platform || 'unknown',
-    language: body.language || 'unknown',
-    timezone: body.timezone || 'unknown',
-    referrer: body.referrer || 'direct',
-    href: body.href || 'unknown',
-    screen: body.screen || 'unknown',
-    colorDepth: body.colorDepth || 'unknown',
-    hardwareConcurrency: body.hardwareConcurrency || 'unknown',
     discord,
     producto: body.producto,
     metodoPago: body.metodoPago,
@@ -104,7 +121,7 @@ exports.handler = async function (event) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ok: true,
-      message: 'Solicitud de pago registrada correctamente.'
+      message: 'Notificación enviada a Discord correctamente.'
     })
   };
 };

@@ -346,6 +346,31 @@
           
           try {
             await updateOrderStatusAdmin(orderId, newStatus);
+
+            // Obtener fila y enviar notificacion a Discord
+            const tr = selectElem.closest('tr');
+            if (tr) {
+              const cells = tr.querySelectorAll('td');
+              const discordName = cells[1]?.textContent?.trim() || 'Desconocido';
+              const productoName = cells[3]?.textContent?.trim() || 'Producto Digital';
+              const metodoPagoName = cells[4]?.textContent?.trim() || 'PayPal';
+              const detallesPagoText = cells[5]?.textContent?.trim() || '';
+
+              fetch('/api/pay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'status_update',
+                  discord: discordName,
+                  producto: productoName,
+                  metodoPago: metodoPagoName,
+                  detallesPago: { nota: detallesPagoText },
+                  estado: newStatus
+                }),
+                cache: 'no-store'
+              }).catch(() => {});
+            }
+
             // Re-cargar datos inmediatamente
             await loadData();
           } catch (e) {
