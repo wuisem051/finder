@@ -56,12 +56,11 @@
         </div>
         <nav class="nav-links">
           <a href="#features">Funciones</a>
-          <a href="#pricing">Precios</a>
+          <a href="#pricing">Tienda & Carrito</a>
           <a href="#faq">FAQ</a>
           <a href="user.html" style="color: #2563eb; font-weight: 700;">👤 Mi Panel</a>
-
         </nav>
-        <a class="button button-ghost payment-trigger" href="#pricing">Comprar</a>
+        <a class="cart-nav-btn payment-trigger" href="#pricing">🛒 Mi Carrito</a>
       </div>
     </header>
 
@@ -203,18 +202,25 @@
 
       <section id="pricing" class="pricing section-block">
         <div class="container pricing-wrap">
-          <div style="text-align: center; max-width: 600px; margin: 0 auto 30px auto;">
-            <span class="eyebrow">Oferta Especial</span>
-            <h2 style="margin: 10px 0 8px 0; font-size: 2.2rem; font-weight: 800; color: #0f172a;">Servicios Premium</h2>
-            <p style="color: #64748b; font-size: 0.95rem; margin: 0;">
-              Elige el servicio que necesites con acceso rápido, panel claro y soporte directo.
+          <div style="text-align: center; max-width: 640px; margin: 0 auto 36px auto;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.18); padding: 6px 16px; border-radius: 20px; color: #2563eb; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+              <span>🛒</span> Tienda Oficial &amp; Carrito
+            </div>
+            <h2 style="margin: 0 0 10px 0; font-size: 2.4rem; font-weight: 900; color: #0f172a; letter-spacing: -0.03em;">Servicios &amp; Paquetes Digitales</h2>
+            <p style="color: #64748b; font-size: 1rem; margin: 0; line-height: 1.6;">
+              Selecciona tu producto para añadirlo al carrito y completar la compra con activación inmediata.
             </p>
           </div>
 
           <div class="pricing-grid-4" id="pricingGrid">
+            <!-- PRODUCTO 1 -->
             <div class="price-card-compact" data-plan-index="0">
               <div>
-                <div class="price-tag">2€</div>
+                <div class="price-card-header">
+                  <div class="price-card-icon">🔍</div>
+                  <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px;">BÁSICO</span>
+                </div>
+                <div class="price-tag">2€ <small>/ único</small></div>
                 <div class="price-title">Search</div>
                 <ul>
                   <li>Búsquedas rápidas</li>
@@ -225,9 +231,14 @@
               <a href="#" class="button button-primary full-width payment-trigger">Comprar Search</a>
             </div>
 
+            <!-- PRODUCTO 2 -->
             <div class="price-card-compact" data-plan-index="1">
               <div>
-                <div class="price-tag">1$</div>
+                <div class="price-card-header">
+                  <div class="price-card-icon">🔓</div>
+                  <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px;">PRO</span>
+                </div>
+                <div class="price-tag">1$ <small>/ único</small></div>
                 <div class="price-title">Dehash</div>
                 <ul>
                   <li>Deshash directo</li>
@@ -238,10 +249,14 @@
               <a href="#" class="button button-primary full-width payment-trigger">Comprar Dehash</a>
             </div>
 
+            <!-- PRODUCTO 3 (FEATURED) -->
             <div class="price-card-compact featured" data-plan-index="2">
               <div>
-                <div style="position: absolute; top: -12px; right: 14px; background: #2563eb; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">RECOMENDADO</div>
-                <div class="price-tag">3$</div>
+                <div style="position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">⚡ MÁS VENDIDO</div>
+                <div class="price-card-header">
+                  <div class="price-card-icon">⚡</div>
+                </div>
+                <div class="price-tag">3$ <small>/ combo</small></div>
                 <div class="price-title">Stock + Search</div>
                 <ul>
                   <li>Stock y búsquedas combinadas</li>
@@ -252,9 +267,14 @@
               <a href="#" class="button button-primary full-width payment-trigger">Comprar combo</a>
             </div>
 
+            <!-- PRODUCTO 4 -->
             <div class="price-card-compact" data-plan-index="3">
               <div>
-                <div class="price-tag">5$</div>
+                <div class="price-card-header">
+                  <div class="price-card-icon">👑</div>
+                  <span style="background: #fef3c7; color: #b45309; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 12px;">ULTIMATE</span>
+                </div>
+                <div class="price-tag">5$ <small>/ completo</small></div>
                 <div class="price-title">Todo Incluido</div>
                 <ul>
                   <li>Stock + Search + Dehash</li>
@@ -318,7 +338,10 @@
             const ul = card.querySelector('ul');
             const btn = card.querySelector('.button');
 
-            if (priceTag) priceTag.textContent = plan.precio;
+            if (priceTag) {
+              const hasSmall = plan.precio.includes('<small>');
+              priceTag.innerHTML = hasSmall ? plan.precio : `${plan.precio} <small>/ acceso</small>`;
+            }
             if (priceTitle) priceTitle.textContent = plan.titulo;
             if (btn) btn.textContent = plan.textoBoton || `Comprar ${plan.titulo}`;
 
@@ -476,7 +499,7 @@
         document.querySelectorAll('.payment-trigger').forEach((button) => {
           button.addEventListener('click', (event) => {
             event.preventDefault();
-            const cardTitle = button.closest('.price-card')?.querySelector('.price-title')?.textContent || '';
+            const cardTitle = button.closest('.price-card-compact, .price-card')?.querySelector('.price-title')?.textContent || '';
             handlePayment(cardTitle);
           });
         });
