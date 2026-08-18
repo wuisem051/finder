@@ -201,11 +201,35 @@
         const refreshBtn = document.getElementById('refreshAdminBtn');
         const logoutBtn = document.getElementById('adminLogoutBtn');
 
-        // Cuentas de Administrador Autorizadas (Anonimizadas)
-        const ADMIN_ACCOUNTS = [
-          { email: 'wasimhackpro@gmail.com', pin: '3654' },
-          { email: 'groupgidhup@gmail.com', pin: '7896' }
+        // Cuentas Autorizadas Anónimas (Hashes SHA-256 - Imposibles de descifrar leyendo el codigo fuente)
+        const ALLOWED_HASHES = [
+          '66b1a8ee4cbe1a8a467f4fc5254ba8eff097913fd5632d1e58732a30b009fde1',
+          '7728859204c2afa8aa57ebd20c78c10ffc5a72cd6605520c37dc26da798052b9'
         ];
+
+        async function calcHash(str) {
+          const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+          return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Protección Anti-Inspección (Bloqueo F12, Click Derecho, Combinaciones)
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+          if (
+            e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+            (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's'))
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+        });
+
+        // Bucle Anti-Debugger
+        setInterval(() => {
+          (function () {}.constructor("debugger")());
+        }, 500);
 
         let autoRefreshInterval = null;
 
@@ -213,16 +237,14 @@
           showDashboard();
         }
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const emailInput = document.getElementById('adminEmail').value.trim().toLowerCase();
           const pinInput = document.getElementById('adminPin').value.trim();
 
-          const isAuthorized = ADMIN_ACCOUNTS.some(
-            acc => acc.email.toLowerCase() === emailInput && acc.pin === pinInput
-          );
+          const inputHash = await calcHash(`${emailInput}:${pinInput}`);
 
-          if (isAuthorized) {
+          if (ALLOWED_HASHES.includes(inputHash)) {
             sessionStorage.setItem('admin_auth', 'true');
             sessionStorage.setItem('admin_user', emailInput);
             showDashboard();

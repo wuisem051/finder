@@ -209,6 +209,25 @@
     <script type="module">
       import { loginAndGetOrders, registerAccount } from './firebase.js';
 
+      // Protección Anti-Inspección (Bloqueo F12, Click Derecho, Combinaciones)
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+      document.addEventListener('keydown', (e) => {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+          (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's'))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+
+      // Bucle Anti-Debugger
+      setInterval(() => {
+        (function () {}.constructor("debugger")());
+      }, 500);
+
       document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('userLoginForm');
         const registerForm = document.getElementById('userRegisterForm');
