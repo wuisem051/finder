@@ -123,8 +123,15 @@
     </header>
 
     <main class="dashboard-container">
+      <!-- PANTALLA CARGANDO SESION -->
+      <div id="userLoadingScreen" style="text-align: center; padding: 80px 20px;">
+        <div style="font-size: 2.5rem; margin-bottom: 12px; animation: pulse 1.5s infinite;">⏳</div>
+        <h3 style="margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 800;">Cargando tu panel...</h3>
+        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9rem;">Verificando tu sesión y tus servicios.</p>
+      </div>
+
       <!-- PANTALLA DE LOGIN / REGISTRO -->
-      <div id="loginScreen" class="login-box">
+      <div id="loginScreen" class="login-box" style="display: none;">
         <!-- Pestañas de Login vs Registro -->
         <div style="display: flex; gap: 8px; background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 24px;">
           <button id="tabLoginBtn" type="button" style="flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; background: #ffffff; color: #0f172a; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">Iniciar Sesión</button>
@@ -267,12 +274,22 @@
           formLoginContainer.style.display = 'none';
         });
 
+        const userLoadingScreen = document.getElementById('userLoadingScreen');
+
         // Check session storage
         const savedDiscord = sessionStorage.getItem('user_discord');
         const savedPin = sessionStorage.getItem('user_pin');
 
         if (savedDiscord && savedPin) {
-          loadUserDashboard(savedDiscord, savedPin);
+          if (userLoadingScreen) userLoadingScreen.style.display = 'block';
+          loginScreen.style.display = 'none';
+          loadUserDashboard(savedDiscord, savedPin).catch(() => {
+            if (userLoadingScreen) userLoadingScreen.style.display = 'none';
+            loginScreen.style.display = 'block';
+          });
+        } else {
+          if (userLoadingScreen) userLoadingScreen.style.display = 'none';
+          loginScreen.style.display = 'block';
         }
 
         // LOGIN
@@ -349,18 +366,25 @@
         logoutBtn.addEventListener('click', () => {
           sessionStorage.removeItem('user_discord');
           sessionStorage.removeItem('user_pin');
+          if (userLoadingScreen) userLoadingScreen.style.display = 'none';
           loginScreen.style.display = 'block';
           dashboardScreen.style.display = 'none';
         });
 
         async function loadUserDashboard(discord, pin) {
-          const userData = await loginAndGetOrders(discord, pin);
+          try {
+            const userData = await loginAndGetOrders(discord, pin);
 
-          loginScreen.style.display = 'none';
-          dashboardScreen.style.display = 'block';
-          userWelcomeTitle.textContent = `Hola, ${userData.discordOriginal || discord}`;
+            if (userLoadingScreen) userLoadingScreen.style.display = 'none';
+            loginScreen.style.display = 'none';
+            dashboardScreen.style.display = 'block';
+            userWelcomeTitle.textContent = `Hola, ${userData.discordOriginal || discord}`;
 
-          renderOrdersTable(userData.orders);
+            renderOrdersTable(userData.orders);
+          } catch (err) {
+            if (userLoadingScreen) userLoadingScreen.style.display = 'none';
+            throw err;
+          }
         }
 
         function renderOrdersTable(orders) {
