@@ -1,2 +1,41 @@
 # Local Netlify folder
 .netlify
+node_modules/
+
+# Logs
+*.log
+activity.log
+
+# Environment variables
+.env
+.env.*
+
+# Built things
+_Debug/
+Compiled/
+
+# AudioCache can be rebuilt from sources
+AudioCache/
+
+# Lockfile
+_OpenInEditor.lock
+
+# User settings
+Game.agf.user
+*.crm.user
+
+# Backups
+Game.agf.bak
+backup_acsprset.spr
+
+# Memory dumps
+*.dmp
+
+# Temporary files
+~aclzw.tmp
+game28.dta
+*.exe
+
+# Log files
+warnings.log
+
