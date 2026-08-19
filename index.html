@@ -604,12 +604,12 @@
 
       document.addEventListener('DOMContentLoaded', () => {
         sendVisit();
-        initPayPalButton();
+        if (typeof window.initPayPalButton === 'function') window.initPayPalButton();
 
         const planSelectEl = document.getElementById('planSelect');
         if (planSelectEl) {
           planSelectEl.addEventListener('change', () => {
-            initPayPalButton();
+            if (typeof window.initPayPalButton === 'function') window.initPayPalButton();
           });
         }
 
