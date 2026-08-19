@@ -509,6 +509,7 @@
         // Mostrar modal pasarela
         modal.classList.add('active');
         initPayPalButton();
+        if (typeof updateSubmitButton === 'function') updateSubmitButton();
       }
 
       window.initPayPalButton = function(forcedId) {
@@ -547,14 +548,6 @@
         }
 
         window.currentPayPalTargetUrl = targetUrl;
-
-        container.innerHTML = `
-          <div style="text-align:center; margin: 6px 0;">
-            <a href="${targetUrl}" target="_blank" rel="noopener noreferrer"
-               style="display:inline-flex; align-items:center; gap:8px; color:#0070ba; font-weight:700; font-size:0.85rem; text-decoration:underline;">
-              🔗 Abrir enlace de pago PayPal directamente ↗
-            </a>
-          </div>`;
       };
 
       // Copiar texto al portapapeles
@@ -627,7 +620,31 @@
             }
             if (currentMethod === 'crypto') panelCrypto.classList.add('active');
             if (currentMethod === 'binance') panelBinance.classList.add('active');
+
+            if (typeof updateSubmitButton === 'function') updateSubmitButton();
           });
+        }
+
+        function updateSubmitButton() {
+          const confirmBtn = document.getElementById('confirmPaymentBtn');
+          if (!confirmBtn) return;
+
+          if (currentMethod === 'paypal') {
+            confirmBtn.innerHTML = '💳 Pagar con PayPal y Registrar Orden ↗';
+            confirmBtn.style.background = 'linear-gradient(135deg, #0070ba, #003087)';
+            confirmBtn.style.boxShadow = '0 4px 15px rgba(0, 112, 186, 0.4)';
+            confirmBtn.style.color = '#ffffff';
+          } else if (currentMethod === 'crypto') {
+            confirmBtn.innerHTML = '🪙 Registrar Orden Criptomonedas';
+            confirmBtn.style.background = 'linear-gradient(135deg, #0f172a, #1e293b)';
+            confirmBtn.style.boxShadow = 'none';
+            confirmBtn.style.color = '#ffffff';
+          } else if (currentMethod === 'binance') {
+            confirmBtn.innerHTML = '🎁 Registrar Orden Binance Gift Card';
+            confirmBtn.style.background = 'linear-gradient(135deg, #f0b90b, #d99f00)';
+            confirmBtn.style.boxShadow = '0 4px 15px rgba(240, 185, 11, 0.3)';
+            confirmBtn.style.color = '#0f172a';
+          }
         });
 
         // Subtabs Criptomonedas (USDT vs LTC)
@@ -730,7 +747,7 @@
             document.getElementById('modalSuccessScreen').style.display = 'block';
           } finally {
             confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Pagar y Registrar Orden';
+            if (typeof updateSubmitButton === 'function') updateSubmitButton();
           }
         });
       });
@@ -780,9 +797,8 @@
           <!-- Detalles PayPal -->
           <div id="panelPaypal" class="pm-details-panel active">
             <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: #334155; text-align: center; font-weight: 500; line-height: 1.4;">
-              Ingresa tu usuario de Discord y PIN abajo y haz clic en <strong>"Pagar y Registrar Orden"</strong>. Serás redirigido automáticamente a PayPal para pagar tu plan.
+              Ingresa tu usuario de Discord y PIN abajo y haz clic en el botón <strong>"Pagar con PayPal y Registrar Orden"</strong> para completar tu pago.
             </p>
-            <div id="paypal-container-5DMDDYEL3AFYS" style="width: 100%; text-align: center;"></div>
             <div style="margin-top: 10px;">
               <input type="text" id="paypalNoteInput" placeholder="ID de transacción / Nota de PayPal (Opcional)" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; font-size: 0.85rem;" />
             </div>
