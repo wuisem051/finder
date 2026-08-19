@@ -6,7 +6,8 @@
     <title>Laburo Finder</title>
     <meta
       name="description"
-      content="Landing page moderna y profesional para una herramienta de bÃºsqueda y Obtener ContraseÃ±as Privadas."
+      id="meta-site-description"
+      content="Herramienta premium para búsquedas, rastreo y análisis de datos. Acceso rápido, seguro e intuitivo."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -72,9 +73,9 @@
       <section class="hero">
         <div class="container hero-grid">
           <div class="hero-copy">
-            <span class="pill">Búsquedas premium</span>
-            <h1>Laburo Finder</h1>
-            <p class="subtitle">
+            <span class="pill" id="hero-badge">Búsquedas premium</span>
+            <h1 id="hero-title">Laburo Finder</h1>
+            <p class="subtitle" id="hero-subtitle">
               Datos privados, contraseñas de usuarios de Minecraft con acceso premium.
               Rastrear información y optimizar búsquedas con una experiencia limpia, rápida e intuitiva.
             </p>
@@ -323,7 +324,29 @@
     </footer>
 
     <script type="module">
-      import { saveVisit, savePurchase, getPricingConfig } from './firebase.js';
+      import { saveVisit, savePurchase, getPricingConfig, getSeoConfig } from './firebase.js';
+
+      async function applyDynamicSeo() {
+        const seo = await getSeoConfig();
+        if (!seo) return;
+
+        if (seo.metaDescription) {
+          const metaDesc = document.getElementById('meta-site-description') || document.querySelector('meta[name="description"]');
+          if (metaDesc) metaDesc.setAttribute('content', seo.metaDescription);
+        }
+        if (seo.heroBadge) {
+          const badge = document.getElementById('hero-badge');
+          if (badge) badge.textContent = seo.heroBadge;
+        }
+        if (seo.heroTitle) {
+          const title = document.getElementById('hero-title');
+          if (title) title.textContent = seo.heroTitle;
+        }
+        if (seo.heroSubtitle) {
+          const subtitle = document.getElementById('hero-subtitle');
+          if (subtitle) subtitle.textContent = seo.heroSubtitle;
+        }
+      }
 
       async function applyDynamicPricing() {
         const dynamicPlanes = await getPricingConfig();
@@ -372,7 +395,10 @@
         if (typeof window.initPayPalButton === 'function') window.initPayPalButton();
       }
 
-      document.addEventListener('DOMContentLoaded', applyDynamicPricing);
+      document.addEventListener('DOMContentLoaded', () => {
+        applyDynamicPricing();
+        applyDynamicSeo();
+      });
 
       // Protección Anti-Inspección (Bloqueo F12, Click Derecho, Combinaciones)
       document.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -769,8 +795,8 @@
 
           <!-- Detalles PayPal -->
           <div id="panelPaypal" class="pm-details-panel active">
-            <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: #334155; text-align: center;">
-              Paga de forma rápida y segura a través de PayPal:
+            <p style="margin: 0 0 12px 0; font-size: 0.88rem; color: #334155; text-align: center; font-weight: 500;">
+              Haz clic a continuación para completar tu pago de forma segura:
             </p>
             <div id="paypal-container-5DMDDYEL3AFYS" style="display: flex; justify-content: center; min-height: 50px; margin-bottom: 12px;"></div>
             <div style="margin-top: 12px;">

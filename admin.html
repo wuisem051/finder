@@ -307,11 +307,41 @@ Atención prioritaria</textarea>
             </div>
           </div>
         </div>
+
+        <!-- SECCION SEO Y HOME -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0;">🌐 Editar SEO y Portada (Home)</h3>
+              <p style="color: #64748b; font-size: 0.85rem; margin: 4px 0 0 0;">Modifica la Meta Descripción para Google/redes sociales y los textos principales de la página principal.</p>
+            </div>
+            <button id="saveSeoBtn" type="button" class="btn-submit-payment" style="width: auto; padding: 10px 24px; margin: 0; background: linear-gradient(135deg, #2563eb, #1d4ed8);">💾 Guardar SEO y Textos</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+            <div class="modal-field">
+              <label style="font-size:0.8rem; font-weight:700; color:#1e293b;">Meta Descripción (SEO & Vista Previa en Redes)</label>
+              <textarea id="seoMetaDescription" rows="3" style="padding: 10px; font-size:0.85rem; width:100%; border-radius:8px; border:1px solid #cbd5e1;" placeholder="Herramienta premium para búsquedas, rastreo y análisis de datos. Acceso rápido, seguro e intuitivo."></textarea>
+            </div>
+            <div class="modal-field">
+              <label style="font-size:0.8rem; font-weight:700; color:#1e293b;">Etiqueta Insignia (Hero Badge)</label>
+              <input type="text" id="seoHeroBadge" placeholder="Ej: Búsquedas premium" value="Búsquedas premium" style="padding: 10px; font-size:0.85rem;" />
+            </div>
+            <div class="modal-field">
+              <label style="font-size:0.8rem; font-weight:700; color:#1e293b;">Título Principal (Hero Title)</label>
+              <input type="text" id="seoHeroTitle" placeholder="Ej: Laburo Finder" value="Laburo Finder" style="padding: 10px; font-size:0.85rem;" />
+            </div>
+            <div class="modal-field" style="grid-column: 1 / -1;">
+              <label style="font-size:0.8rem; font-weight:700; color:#1e293b;">Subtítulo de la Portada</label>
+              <textarea id="seoHeroSubtitle" rows="2" style="padding: 10px; font-size:0.85rem; width:100%; border-radius:8px; border:1px solid #cbd5e1;" placeholder="Datos privados, contraseñas de usuarios de Minecraft con acceso premium..."></textarea>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
     <script type="module">
-      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, getPricingConfig, savePricingConfig } from './firebase.js';
+      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, getPricingConfig, savePricingConfig, getSeoConfig, saveSeoConfig } from './firebase.js';
 
       document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('adminLoginForm');
@@ -460,11 +490,61 @@ Atención prioritaria</textarea>
           });
         }
 
+        const saveSeoBtn = document.getElementById('saveSeoBtn');
+
+        async function loadSeoForm() {
+          try {
+            const seo = await getSeoConfig();
+            if (!seo) return;
+
+            const descInp = document.getElementById('seoMetaDescription');
+            const badgeInp = document.getElementById('seoHeroBadge');
+            const titleInp = document.getElementById('seoHeroTitle');
+            const subtitleInp = document.getElementById('seoHeroSubtitle');
+
+            if (descInp && seo.metaDescription) descInp.value = seo.metaDescription;
+            if (badgeInp && seo.heroBadge) badgeInp.value = seo.heroBadge;
+            if (titleInp && seo.heroTitle) titleInp.value = seo.heroTitle;
+            if (subtitleInp && seo.heroSubtitle) subtitleInp.value = seo.heroSubtitle;
+          } catch (e) {
+            console.warn("No se pudo cargar la configuracion SEO:", e);
+          }
+        }
+
+        if (saveSeoBtn) {
+          saveSeoBtn.addEventListener('click', async () => {
+            saveSeoBtn.disabled = true;
+            saveSeoBtn.textContent = 'Guardando...';
+
+            try {
+              const metaDescription = document.getElementById('seoMetaDescription').value.trim();
+              const heroBadge = document.getElementById('seoHeroBadge').value.trim();
+              const heroTitle = document.getElementById('seoHeroTitle').value.trim();
+              const heroSubtitle = document.getElementById('seoHeroSubtitle').value.trim();
+
+              await saveSeoConfig({
+                metaDescription,
+                heroBadge,
+                heroTitle,
+                heroSubtitle
+              });
+
+              alert('¡SEO y textos de la portada actualizados correctamente!');
+            } catch (err) {
+              alert('Error al guardar SEO: ' + (err.message || err));
+            } finally {
+              saveSeoBtn.disabled = false;
+              saveSeoBtn.textContent = '💾 Guardar SEO y Textos';
+            }
+          });
+        }
+
         function showDashboard() {
           loginScreen.style.display = 'none';
           dashboardScreen.style.display = 'block';
           loadData();
           loadPricingForm();
+          loadSeoForm();
 
           // Auto actualizar cada 10 segundos
           if (!autoRefreshInterval) {

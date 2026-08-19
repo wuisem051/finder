@@ -277,4 +277,32 @@ export async function savePricingConfig(planesArray) {
   return true;
 }
 
+/**
+ * Obtiene la configuración SEO/Hero desde Firestore.
+ */
+export async function getSeoConfig() {
+  try {
+    const docRef = doc(db, "configuracion", "seo");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() || null;
+    }
+  } catch (e) {
+    console.warn("No se pudo cargar la config SEO:", e);
+  }
+  return null;
+}
+
+/**
+ * [ADMIN] Guarda la configuración SEO/Hero en Firestore.
+ */
+export async function saveSeoConfig(seoData) {
+  const docRef = doc(db, "configuracion", "seo");
+  await setDoc(docRef, {
+    ...seoData,
+    updatedAt: serverTimestamp()
+  });
+  return true;
+}
+
 export { app, analytics, db };
