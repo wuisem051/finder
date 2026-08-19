@@ -504,9 +504,13 @@
 
         if (!modal) return;
 
+        // Asegurar que la pantalla de formulario esté visible y la de éxito oculta
+        if (formScreen) formScreen.style.display = 'block';
+        if (successScreen) successScreen.style.display = 'none';
+
         // Pre-seleccionar plan por índice exacto (0, 1, 2, 3) o coincidencia de título
         if (planSelect && planSelect.options.length > 0) {
-          if (planIndex !== null && planIndex !== undefined && planSelect.options[planIndex]) {
+          if (planIndex !== null && planIndex !== undefined && planIndex !== '' && planSelect.options[parseInt(planIndex, 10)]) {
             planSelect.selectedIndex = parseInt(planIndex, 10);
           } else if (productName) {
             const cleanName = productName.trim().toLowerCase();
@@ -534,6 +538,7 @@
 
         // Mostrar modal pasarela
         modal.classList.add('active');
+
         if (typeof initPayPalButton === 'function') initPayPalButton();
         if (typeof updateSubmitButton === 'function') updateSubmitButton();
       };
@@ -554,7 +559,6 @@
       });
 
       window.initPayPalButton = function(forcedId) {
-        const container = document.getElementById('paypal-container-5DMDDYEL3AFYS');
         const planSelect = document.getElementById('planSelect');
         let paypalValue = forcedId;
 
