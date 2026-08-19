@@ -525,9 +525,12 @@
         if (savedDiscord && discordInput) discordInput.value = savedDiscord;
         if (savedPin && pinInput) pinInput.value = savedPin;
 
-        // Reset screens
-        if (formScreen) formScreen.style.display = 'block';
-        if (successScreen) successScreen.style.display = 'none';
+        // Reset modal scroll position to top
+        const modalCard = modal.querySelector('.modal-card');
+        if (modalCard) modalCard.scrollTop = 0;
+
+        // Bloquear scroll del fondo
+        document.body.style.overflow = 'hidden';
 
         // Mostrar modal pasarela
         modal.classList.add('active');
@@ -612,7 +615,10 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         const finishPaymentBtn = document.getElementById('finishPaymentBtn');
 
-        const closeModal = () => modal.classList.remove('active');
+        const closeModal = () => {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        };
 
         if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
         if (finishPaymentBtn) finishPaymentBtn.addEventListener('click', closeModal);
