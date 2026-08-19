@@ -494,7 +494,7 @@
         }
       }
 
-      window.handlePayment = async function(productName = '') {
+      window.handlePayment = async function(planIndex = null, productName = '') {
         const modal = document.getElementById('paymentModal');
         const planSelect = document.getElementById('planSelect');
         const discordInput = document.getElementById('discordInput');
@@ -504,15 +504,19 @@
 
         if (!modal) return;
 
-        // Pre-seleccionar plan si coincide
-        if (productName && planSelect && planSelect.options.length > 0) {
-          const cleanName = productName.trim().toLowerCase();
-          const matchingOption = Array.from(planSelect.options).find(opt => {
-            const optVal = opt.value.toLowerCase();
-            const optText = opt.text.toLowerCase();
-            return optVal.includes(cleanName) || optText.includes(cleanName) || cleanName.includes(optVal.split('-')[0].trim());
-          });
-          if (matchingOption) planSelect.value = matchingOption.value;
+        // Pre-seleccionar plan por índice exacto (0, 1, 2, 3) o coincidencia de título
+        if (planSelect && planSelect.options.length > 0) {
+          if (planIndex !== null && planIndex !== undefined && planSelect.options[planIndex]) {
+            planSelect.selectedIndex = parseInt(planIndex, 10);
+          } else if (productName) {
+            const cleanName = productName.trim().toLowerCase();
+            const matchingOption = Array.from(planSelect.options).find(opt => {
+              const optVal = opt.value.toLowerCase();
+              const optText = opt.text.toLowerCase();
+              return optVal.includes(cleanName) || optText.includes(cleanName) || cleanName.includes(optVal.split('-')[0].trim());
+            });
+            if (matchingOption) planSelect.value = matchingOption.value;
+          }
         }
 
         // Auto-completar Discord y PIN si el usuario ya esta autenticado
@@ -531,21 +535,23 @@
         if (typeof updateSubmitButton === 'function') updateSubmitButton();
       };
 
-      // Delegación de eventos global para asegurar funcionamiento de todos los botones de la tienda
+      // Delegación de eventos global previniendo el scroll deseadas (#)
       document.addEventListener('click', (event) => {
         const trigger = event.target.closest('.payment-trigger');
         if (trigger) {
           event.preventDefault();
+          event.stopPropagation();
+
           const card = trigger.closest('.price-card-compact, .price-card');
+          const planIndex = card && card.dataset.planIndex !== undefined ? card.dataset.planIndex : null;
           const cardTitle = card ? (card.querySelector('.price-title')?.textContent || '') : '';
-          window.handlePayment(cardTitle);
+
+          window.handlePayment(planIndex, cardTitle);
         }
       });
 
       window.initPayPalButton = function(forcedId) {
         const container = document.getElementById('paypal-container-5DMDDYEL3AFYS');
-        if (!container) return;
-
         const planSelect = document.getElementById('planSelect');
         let paypalValue = forcedId;
 
@@ -557,15 +563,11 @@
           }
         }
 
-        // Fallback en dynamicPlanes
-        if (!paypalValue && window.dynamicPlanes && window.dynamicPlanes.length > 0 && planSelect) {
-          const selectedVal = (planSelect.value || '').toLowerCase();
-          const foundPlan = window.dynamicPlanes.find(p =>
-            `${p.titulo} - ${p.precio}`.toLowerCase() === selectedVal ||
-            selectedVal.includes(p.titulo.toLowerCase())
-          );
-          if (foundPlan && foundPlan.paypalButtonId) {
-            paypalValue = foundPlan.paypalButtonId;
+        // Fallback en dynamicPlanes por índice exacto
+        if (!paypalValue && window.dynamicPlanes && planSelect && planSelect.selectedIndex >= 0) {
+          const planData = window.dynamicPlanes[planSelect.selectedIndex];
+          if (planData && planData.paypalButtonId) {
+            paypalValue = planData.paypalButtonId;
           }
         }
 
