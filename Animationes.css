@@ -804,6 +804,17 @@ a {
   animation: fadeIn 0.25s ease;
 }
 
+#paypal-container-5DMDDYEL3AFYS {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+#paypal-container-5DMDDYEL3AFYS * {
+  max-width: 100%;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
