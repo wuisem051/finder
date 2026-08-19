@@ -219,6 +219,10 @@ Consulta directa</textarea>
                 <label style="font-size:0.78rem;">Texto del Botón</label>
                 <input type="text" class="plan-btn-input" value="Comprar Search" style="padding: 8px; font-size:0.85rem;" />
               </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem; font-weight:700; color:#1e293b;">ID o Enlace de Pago PayPal (Hosted Button ID / Link)</label>
+                <input type="text" class="plan-paypal-id-input" placeholder="Ej: 5DMDDYEL3AFYS o https://www.paypal.com/ncp/payment/9PL9XPTUBCF8" value="5DMDDYEL3AFYS" style="padding: 8px; font-size:0.85rem;" />
+              </div>
             </div>
 
             <!-- PLAN 2 -->
@@ -241,6 +245,10 @@ Soporte activo</textarea>
               <div class="modal-field" style="margin: 8px 0;">
                 <label style="font-size:0.78rem;">Texto del Botón</label>
                 <input type="text" class="plan-btn-input" value="Comprar Dehash" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem; font-weight:700; color:#1e293b;">ID o Enlace de Pago PayPal (Hosted Button ID / Link)</label>
+                <input type="text" class="plan-paypal-id-input" placeholder="Ej: 5DMDDYEL3AFYS o https://www.paypal.com/ncp/payment/9PL9XPTUBCF8" value="5DMDDYEL3AFYS" style="padding: 8px; font-size:0.85rem;" />
               </div>
             </div>
 
@@ -265,6 +273,10 @@ Acceso premium</textarea>
                 <label style="font-size:0.78rem;">Texto del Botón</label>
                 <input type="text" class="plan-btn-input" value="Comprar combo" style="padding: 8px; font-size:0.85rem;" />
               </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem; font-weight:700; color:#1e293b;">ID o Enlace de Pago PayPal (Hosted Button ID / Link)</label>
+                <input type="text" class="plan-paypal-id-input" placeholder="Ej: 5DMDDYEL3AFYS o https://www.paypal.com/ncp/payment/9PL9XPTUBCF8" value="5DMDDYEL3AFYS" style="padding: 8px; font-size:0.85rem;" />
+              </div>
             </div>
 
             <!-- PLAN 4 -->
@@ -287,6 +299,10 @@ Atención prioritaria</textarea>
               <div class="modal-field" style="margin: 8px 0;">
                 <label style="font-size:0.78rem;">Texto del Botón</label>
                 <input type="text" class="plan-btn-input" value="Comprar todo" style="padding: 8px; font-size:0.85rem;" />
+              </div>
+              <div class="modal-field" style="margin: 8px 0;">
+                <label style="font-size:0.78rem; font-weight:700; color:#1e293b;">ID Botón PayPal (Hosted Button ID)</label>
+                <input type="text" class="plan-paypal-id-input" placeholder="Ej: 5DMDDYEL3AFYS" value="5DMDDYEL3AFYS" style="padding: 8px; font-size:0.85rem;" />
               </div>
             </div>
           </div>
@@ -389,6 +405,7 @@ Atención prioritaria</textarea>
                 const priceInp = cardBox.querySelector('.plan-price-input');
                 const featInp = cardBox.querySelector('.plan-features-input');
                 const btnInp = cardBox.querySelector('.plan-btn-input');
+                const paypalIdInp = cardBox.querySelector('.plan-paypal-id-input');
 
                 if (titleInp && plan.titulo) titleInp.value = plan.titulo;
                 if (priceInp && plan.precio) priceInp.value = plan.precio;
@@ -396,6 +413,7 @@ Atención prioritaria</textarea>
                   featInp.value = Array.isArray(plan.caracteristicas) ? plan.caracteristicas.join('\n') : plan.caracteristicas;
                 }
                 if (btnInp && plan.textoBoton) btnInp.value = plan.textoBoton;
+                if (paypalIdInp && plan.paypalButtonId) paypalIdInp.value = plan.paypalButtonId;
               }
             });
           } catch (e) {
@@ -417,6 +435,7 @@ Atención prioritaria</textarea>
                   const precio = cardBox.querySelector('.plan-price-input').value.trim();
                   const caracteristicasRaw = cardBox.querySelector('.plan-features-input').value.trim();
                   const textoBoton = cardBox.querySelector('.plan-btn-input').value.trim();
+                  const paypalButtonId = cardBox.querySelector('.plan-paypal-id-input')?.value?.trim() || '5DMDDYEL3AFYS';
 
                   const caracteristicas = caracteristicasRaw.split('\n').map(c => c.trim()).filter(c => c.length > 0);
 
@@ -424,7 +443,8 @@ Atención prioritaria</textarea>
                     titulo: titulo || `Plan ${i + 1}`,
                     precio: precio || `0$`,
                     caracteristicas,
-                    textoBoton: textoBoton || `Comprar`
+                    textoBoton: textoBoton || `Comprar`,
+                    paypalButtonId: paypalButtonId || '5DMDDYEL3AFYS'
                   });
                 }
               }

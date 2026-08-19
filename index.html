@@ -15,6 +15,10 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="Animationes.css" />
+    <script 
+      src="https://www.paypal.com/sdk/js?client-id=BAA1kZS2hGOsH78qq6ojkAhdu4RMCw4vm88gFFFQ6GnYgzXZaYjmndKHMqYDOUycP4Cplaybui4JAovwoU&components=hosted-buttons&disable-funding=venmo&currency=USD"
+      onload="if (typeof initPayPalButton === 'function') initPayPalButton();">
+    </script>
   </head>
   <body>
     <audio id="bg-music" autoplay loop preload="auto" playsinline volume="0.35">
@@ -330,6 +334,8 @@
 
         if (planSelect) planSelect.innerHTML = '';
 
+        window.dynamicPlanes = dynamicPlanes;
+
         dynamicPlanes.forEach((plan, index) => {
           const card = cards[index];
           if (card) {
@@ -358,9 +364,12 @@
             const opt = document.createElement('option');
             opt.value = `${plan.titulo} - ${plan.precio}`;
             opt.textContent = `${plan.titulo} (${plan.precio})`;
+            opt.dataset.paypalId = plan.paypalButtonId || '5DMDDYEL3AFYS';
             planSelect.appendChild(opt);
           }
         });
+
+        if (typeof window.initPayPalButton === 'function') window.initPayPalButton();
       }
 
       document.addEventListener('DOMContentLoaded', applyDynamicPricing);
@@ -477,7 +486,71 @@
 
         // Mostrar modal pasarela
         modal.classList.add('active');
+        initPayPalButton();
       }
+
+      window.initPayPalButton = function(forcedId) {
+        const container = document.getElementById('paypal-container-5DMDDYEL3AFYS');
+        if (!container) return;
+
+        const planSelect = document.getElementById('planSelect');
+        let paypalValue = forcedId;
+
+        // Intentar obtener el valor del plan seleccionado
+        if (!paypalValue && planSelect && planSelect.selectedIndex >= 0) {
+          const selectedOpt = planSelect.options[planSelect.selectedIndex];
+          if (selectedOpt && selectedOpt.dataset && selectedOpt.dataset.paypalId) {
+            paypalValue = selectedOpt.dataset.paypalId;
+          }
+        }
+
+        // Fallback en dynamicPlanes
+        if (!paypalValue && window.dynamicPlanes && window.dynamicPlanes.length > 0 && planSelect) {
+          const selectedVal = (planSelect.value || '').toLowerCase();
+          const foundPlan = window.dynamicPlanes.find(p =>
+            `${p.titulo} - ${p.precio}`.toLowerCase() === selectedVal ||
+            selectedVal.includes(p.titulo.toLowerCase())
+          );
+          if (foundPlan && foundPlan.paypalButtonId) {
+            paypalValue = foundPlan.paypalButtonId;
+          }
+        }
+
+        if (!paypalValue) paypalValue = '5DMDDYEL3AFYS';
+
+        // Si el valor ya está renderizado, no volver a hacerlo
+        if (container.dataset.renderedId === paypalValue && container.children.length > 0) return;
+
+        container.innerHTML = '';
+        container.dataset.renderedId = paypalValue;
+
+        // Detectar si es un enlace directo (URL) o un Hosted Button ID
+        const isLink = paypalValue.startsWith('http://') || paypalValue.startsWith('https://');
+
+        if (isLink) {
+          // Mostrar botón que abre el enlace de pago de PayPal
+          container.innerHTML = `
+            <a href="${paypalValue}" target="_blank" rel="noopener noreferrer"
+               style="display:inline-flex; align-items:center; gap:10px; background:#0070ba; color:#fff;
+                      font-weight:700; font-size:1rem; padding:13px 28px; border-radius:30px;
+                      text-decoration:none; box-shadow:0 4px 14px rgba(0,112,186,0.35);
+                      transition:background 0.2s,transform 0.15s; border:none; cursor:pointer;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.067 7.301C20.067 4.205 17.55 2 14.108 2H7.44a1 1 0 0 0-.987.85L4.007 18.15A.6.6 0 0 0 4.6 18.85h3.47l.87-5.53-.027.19a1 1 0 0 1 .987-.85h2.054c4.04 0 7.2-1.64 8.12-6.39.027-.14.05-.278.07-.416-.003 0-.005-.002-.077-.543z"/>
+              </svg>
+              Pagar con PayPal
+            </a>`;
+          // Efecto hover via JS
+          const btn = container.querySelector('a');
+          if (btn) {
+            btn.addEventListener('mouseenter', () => { btn.style.background = '#003087'; btn.style.transform = 'translateY(-1px)'; });
+            btn.addEventListener('mouseleave', () => { btn.style.background = '#0070ba'; btn.style.transform = 'none'; });
+          }
+        } else if (window.paypal && typeof paypal.HostedButtons === 'function') {
+          // Renderizar el Hosted Button Widget
+          paypal.HostedButtons({ hostedButtonId: paypalValue }).render('#paypal-container-5DMDDYEL3AFYS');
+        }
+      };
 
       // Copiar texto al portapapeles
       window.copyToClipboard = function(text, btnElement) {
@@ -494,6 +567,14 @@
 
       document.addEventListener('DOMContentLoaded', () => {
         sendVisit();
+        initPayPalButton();
+
+        const planSelectEl = document.getElementById('planSelect');
+        if (planSelectEl) {
+          planSelectEl.addEventListener('change', () => {
+            initPayPalButton();
+          });
+        }
 
         // Botones que abren el modal
         document.querySelectorAll('.payment-trigger').forEach((button) => {
@@ -535,7 +616,10 @@
             panelCrypto.classList.remove('active');
             panelBinance.classList.remove('active');
 
-            if (currentMethod === 'paypal') panelPaypal.classList.add('active');
+            if (currentMethod === 'paypal') {
+              panelPaypal.classList.add('active');
+              initPayPalButton();
+            }
             if (currentMethod === 'crypto') panelCrypto.classList.add('active');
             if (currentMethod === 'binance') panelBinance.classList.add('active');
           });
@@ -685,13 +769,10 @@
 
           <!-- Detalles PayPal -->
           <div id="panelPaypal" class="pm-details-panel active">
-            <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: #334155;">
-              Realiza el envío por PayPal a la siguiente dirección:
+            <p style="margin: 0 0 10px 0; font-size: 0.88rem; color: #334155; text-align: center;">
+              Paga de forma rápida y segura a través de PayPal:
             </p>
-            <div class="copy-box">
-              <code id="paypalEmailCode">pagos@laburofinder.com</code>
-              <button type="button" class="btn-copy" onclick="copyToClipboard('pagos@laburofinder.com', this)">Copiar</button>
-            </div>
+            <div id="paypal-container-5DMDDYEL3AFYS" style="display: flex; justify-content: center; min-height: 50px; margin-bottom: 12px;"></div>
             <div style="margin-top: 12px;">
               <input type="text" id="paypalNoteInput" placeholder="ID de transacción / Nota de PayPal (Opcional)" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; width: 100%; font-size: 0.85rem;" />
             </div>
