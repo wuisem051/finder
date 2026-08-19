@@ -494,7 +494,7 @@
         }
       }
 
-      async function handlePayment(productName = 'Producto Digital') {
+      window.handlePayment = async function(productName = '') {
         const modal = document.getElementById('paymentModal');
         const planSelect = document.getElementById('planSelect');
         const discordInput = document.getElementById('discordInput');
@@ -502,9 +502,16 @@
         const formScreen = document.getElementById('modalFormScreen');
         const successScreen = document.getElementById('modalSuccessScreen');
 
+        if (!modal) return;
+
         // Pre-seleccionar plan si coincide
-        if (productName) {
-          const matchingOption = Array.from(planSelect.options).find(opt => opt.text.toLowerCase().includes(productName.toLowerCase()) || opt.value.toLowerCase().includes(productName.toLowerCase()));
+        if (productName && planSelect && planSelect.options.length > 0) {
+          const cleanName = productName.trim().toLowerCase();
+          const matchingOption = Array.from(planSelect.options).find(opt => {
+            const optVal = opt.value.toLowerCase();
+            const optText = opt.text.toLowerCase();
+            return optVal.includes(cleanName) || optText.includes(cleanName) || cleanName.includes(optVal.split('-')[0].trim());
+          });
           if (matchingOption) planSelect.value = matchingOption.value;
         }
 
@@ -515,14 +522,25 @@
         if (savedPin && pinInput) pinInput.value = savedPin;
 
         // Reset screens
-        formScreen.style.display = 'block';
-        successScreen.style.display = 'none';
+        if (formScreen) formScreen.style.display = 'block';
+        if (successScreen) successScreen.style.display = 'none';
 
         // Mostrar modal pasarela
         modal.classList.add('active');
-        initPayPalButton();
+        if (typeof initPayPalButton === 'function') initPayPalButton();
         if (typeof updateSubmitButton === 'function') updateSubmitButton();
-      }
+      };
+
+      // Delegación de eventos global para asegurar funcionamiento de todos los botones de la tienda
+      document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('.payment-trigger');
+        if (trigger) {
+          event.preventDefault();
+          const card = trigger.closest('.price-card-compact, .price-card');
+          const cardTitle = card ? (card.querySelector('.price-title')?.textContent || '') : '';
+          window.handlePayment(cardTitle);
+        }
+      });
 
       window.initPayPalButton = function(forcedId) {
         const container = document.getElementById('paypal-container-5DMDDYEL3AFYS');
@@ -586,14 +604,6 @@
           });
         }
 
-        // Botones que abren el modal
-        document.querySelectorAll('.payment-trigger').forEach((button) => {
-          button.addEventListener('click', (event) => {
-            event.preventDefault();
-            const cardTitle = button.closest('.price-card-compact, .price-card')?.querySelector('.price-title')?.textContent || '';
-            handlePayment(cardTitle);
-          });
-        });
 
         // Cerrar modal
         const modal = document.getElementById('paymentModal');
