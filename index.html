@@ -320,7 +320,18 @@
     </footer>
 
     <script type="module">
-      import { saveVisit, savePurchase, getPricingConfig, getSeoConfig } from './firebase.js';
+      import { saveVisit, savePurchase, getPricingConfig, getSeoConfig, getWalletsConfig } from './firebase.js';
+
+      async function applyDynamicWallets() {
+        const wallets = await getWalletsConfig();
+        if (!wallets) return;
+
+        const usdtCode = document.getElementById('usdtWalletCode');
+        const ltcCode = document.getElementById('ltcWalletCode');
+
+        if (usdtCode && wallets.usdt) usdtCode.textContent = wallets.usdt;
+        if (ltcCode && wallets.ltc) ltcCode.textContent = wallets.ltc;
+      }
 
       async function applyDynamicSeo() {
         const seo = await getSeoConfig();
@@ -394,6 +405,7 @@
       document.addEventListener('DOMContentLoaded', () => {
         applyDynamicPricing();
         applyDynamicSeo();
+        applyDynamicWallets();
       });
 
       // Protección Anti-Inspección (Bloqueo F12, Click Derecho, Combinaciones)

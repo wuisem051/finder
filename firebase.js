@@ -305,4 +305,33 @@ export async function saveSeoConfig(seoData) {
   return true;
 }
 
+/**
+ * Obtiene la configuración de billeteras de pago (USDT, LTC, Binance) desde Firestore.
+ */
+export async function getWalletsConfig() {
+  try {
+    const docRef = doc(db, "configuracion", "wallets");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() || null;
+    }
+  } catch (e) {
+    console.warn("No se pudo cargar la config de billeteras:", e);
+  }
+  return null;
+}
+
+/**
+ * [ADMIN] Guarda la configuración de billeteras de pago en Firestore.
+ */
+export async function saveWalletsConfig(walletsData) {
+  const docRef = doc(db, "configuracion", "wallets");
+  await setDoc(docRef, {
+    ...walletsData,
+    updatedAt: serverTimestamp()
+  });
+  return true;
+}
+
 export { app, analytics, db };
+

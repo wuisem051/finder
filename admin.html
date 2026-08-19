@@ -337,11 +337,33 @@ Atención prioritaria</textarea>
             </div>
           </div>
         </div>
+
+        <!-- SECCION EDITAR BILLETERAS DE PAGO -->
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0;">💳 Editar Billeteras de Pago (Criptomonedas / Binance)</h3>
+              <p style="color: #64748b; font-size: 0.85rem; margin: 4px 0 0 0;">Modifica las direcciones USDT, Litecoin y Binance para la pasarela de pago.</p>
+            </div>
+            <button id="saveWalletsBtn" type="button" class="btn-submit-payment" style="width: auto; padding: 10px 24px; margin: 0; background: linear-gradient(135deg, #0284c7, #0369a1);">💾 Guardar Billeteras</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+            <div class="modal-field">
+              <label style="font-size:0.8rem; font-weight:700; color:#1e293b;">Dirección USDT (Red TRC20)</label>
+              <input type="text" id="walletUsdt" placeholder="Ej: TY3x6P9kLmN7vR8qW2sA4bC1dE5fG6hI7j" value="TY3x6P9kLmN7vR8qW2sA4bC1dE5fG6hI7j" style="padding: 10px; font-size:0.85rem;" />
+            </div>
+            <div class="modal-field">
+              <label style="font-size:0.8rem; font-weight:700; color:#1e293b;">Dirección Litecoin (LTC)</label>
+              <input type="text" id="walletLtc" placeholder="Ej: Ltc1q9x3m7k4p8v2w5s6a7b8c9d0e1f2g3h4i5j6k" value="Ltc1q9x3m7k4p8v2w5s6a7b8c9d0e1f2g3h4i5j6k" style="padding: 10px; font-size:0.85rem;" />
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
     <script type="module">
-      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, getPricingConfig, savePricingConfig, getSeoConfig, saveSeoConfig } from './firebase.js';
+      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, getPricingConfig, savePricingConfig, getSeoConfig, saveSeoConfig, getWalletsConfig, saveWalletsConfig } from './firebase.js';
 
       document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('adminLoginForm');
@@ -539,12 +561,51 @@ Atención prioritaria</textarea>
           });
         }
 
+        const saveWalletsBtn = document.getElementById('saveWalletsBtn');
+
+        async function loadWalletsForm() {
+          try {
+            const wallets = await getWalletsConfig();
+            if (!wallets) return;
+
+            const usdtInp = document.getElementById('walletUsdt');
+            const ltcInp = document.getElementById('walletLtc');
+
+            if (usdtInp && wallets.usdt) usdtInp.value = wallets.usdt;
+            if (ltcInp && wallets.ltc) ltcInp.value = wallets.ltc;
+          } catch (e) {
+            console.warn("No se pudo cargar la configuracion de billeteras:", e);
+          }
+        }
+
+        if (saveWalletsBtn) {
+          saveWalletsBtn.addEventListener('click', async () => {
+            saveWalletsBtn.disabled = true;
+            saveWalletsBtn.textContent = 'Guardando...';
+
+            try {
+              const usdt = document.getElementById('walletUsdt').value.trim();
+              const ltc = document.getElementById('walletLtc').value.trim();
+
+              await saveWalletsConfig({ usdt, ltc });
+
+              alert('¡Direcciones de billeteras actualizadas correctamente!');
+            } catch (err) {
+              alert('Error al guardar billeteras: ' + (err.message || err));
+            } finally {
+              saveWalletsBtn.disabled = false;
+              saveWalletsBtn.textContent = '💾 Guardar Billeteras';
+            }
+          });
+        }
+
         function showDashboard() {
           loginScreen.style.display = 'none';
           dashboardScreen.style.display = 'block';
           loadData();
           loadPricingForm();
           loadSeoForm();
+          loadWalletsForm();
 
           // Auto actualizar cada 10 segundos
           if (!autoRefreshInterval) {
