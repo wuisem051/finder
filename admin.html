@@ -91,6 +91,29 @@
       .table-wrapper {
         overflow-x: auto;
       }
+      .btn-delete-order {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1.5px solid #fecaca;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.18s;
+        white-space: nowrap;
+        margin-top: 6px;
+      }
+      .btn-delete-order:hover {
+        background: #b91c1c;
+        color: #ffffff;
+        border-color: #b91c1c;
+        transform: scale(1.04);
+        box-shadow: 0 3px 10px rgba(185,28,28,0.25);
+      }
     </style>
   </head>
   <body>
@@ -363,7 +386,7 @@ Atención prioritaria</textarea>
     </main>
 
     <script type="module">
-      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, getPricingConfig, savePricingConfig, getSeoConfig, saveSeoConfig, getWalletsConfig, saveWalletsConfig } from './firebase.js';
+      import { getAllOrdersAdmin, getAllVisitsAdmin, updateOrderStatusAdmin, deleteOrderAdmin, getPricingConfig, savePricingConfig, getSeoConfig, saveSeoConfig, getWalletsConfig, saveWalletsConfig } from './firebase.js';
 
       document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('adminLoginForm');
@@ -646,7 +669,7 @@ Atención prioritaria</textarea>
           if (!orders || orders.length === 0) {
             tbody.innerHTML = `
               <tr>
-                <td colspan="8" style="text-align:center; padding:30px; color:#64748b;">
+                <td colspan="9" style="text-align:center; padding:30px; color:#64748b;">
                   <div style="font-size:1.8rem; margin-bottom:6px;">📦</div>
                   <strong>No hay compras registradas aún.</strong><br>
                   <small style="color:#94a3b8;">Las nuevas compras realizadas desde la tienda aparecerán aquí automáticamente.</small>
@@ -686,6 +709,7 @@ Atención prioritaria</textarea>
                     <option value="Activado" ${estadoActual === 'Activado' ? 'selected' : ''}>🟢 Pago Recibido / Activado</option>
                     <option value="Rechazado" ${estadoActual === 'Rechazado' ? 'selected' : ''}>🔴 Rechazado</option>
                   </select>
+                  <button class="btn-delete-order" onclick="deleteOrder('${order.id}', this)">🗑️ Eliminar</button>
                 </td>
               </tr>
             `;
@@ -729,6 +753,31 @@ Atención prioritaria</textarea>
             await loadData();
           } catch (e) {
             alert('Error al actualizar el estado de la orden');
+          }
+        };
+
+        window.deleteOrder = async function(orderId, btnElem) {
+          const tr = btnElem.closest('tr');
+          const discord = tr ? tr.querySelector('td:nth-child(2)')?.textContent?.trim() : orderId;
+          const confirmed = confirm(`¿Eliminar el pedido de "${discord}"?\n\nEsta acción no se puede deshacer.`);
+          if (!confirmed) return;
+
+          btnElem.disabled = true;
+          btnElem.textContent = 'Eliminando...';
+
+          try {
+            await deleteOrderAdmin(orderId);
+            if (tr) {
+              tr.style.transition = 'opacity 0.3s, transform 0.3s';
+              tr.style.opacity = '0';
+              tr.style.transform = 'translateX(30px)';
+              setTimeout(() => { tr.remove(); }, 300);
+            }
+            await loadData();
+          } catch (e) {
+            alert('Error al eliminar el pedido: ' + (e.message || e));
+            btnElem.disabled = false;
+            btnElem.innerHTML = '🗑️ Eliminar';
           }
         };
       });

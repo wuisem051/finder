@@ -10,6 +10,7 @@ import {
   setDoc,
   doc,
   updateDoc,
+  deleteDoc,
   query, 
   where, 
   orderBy, 
@@ -247,6 +248,14 @@ export async function updateOrderStatusAdmin(orderId, newStatus) {
   await updateDoc(orderRef, {
     estado: newStatus
   });
+}
+
+/**
+ * [ADMIN] Elimina una orden de la coleccion "compras".
+ */
+export async function deleteOrderAdmin(orderId) {
+  const orderRef = doc(db, "compras", orderId);
+  await deleteDoc(orderRef);
 }
 
 /**
